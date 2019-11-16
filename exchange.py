@@ -19,6 +19,7 @@ def post_blockchain():
     submitted_blocks = json.loads(request.data)
     # blocks.extend(submitted_blocks)
     print (json.dumps(submitted_blocks))
+    print(len(json.dumps(submitted_blocks)))
     return '{"status":"accepted"}'
 
 

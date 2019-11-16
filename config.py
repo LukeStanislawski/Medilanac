@@ -6,10 +6,10 @@ import sys, os
 # ----
 
 # Number of miners to create
-num_miners = 2
+num_miners = 1
 
 # Number of blocks each miner should generate (excluding genesis)
-num_blocks = 3
+num_blocks = 1
 
 # Path to blockchain dir
 blockchain_dir = os.path.join(os.path.dirname(__file__), "data", "blockchain")
