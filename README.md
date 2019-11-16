@@ -9,7 +9,7 @@ email: psyls6@nottingham.edu.cn
 The following software is required:
 
 - Python 3.7.5
-- Flask 1.1.1
+- pycrypto 2.6.1
 
 ## Running the software
 

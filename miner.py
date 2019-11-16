@@ -1,3 +1,4 @@
+import sys, os
 import crypt
 import json
 
@@ -22,7 +23,10 @@ class Miner():
 			block["body"] = crypt.get_rand_str()
 			self.blockchain.append(block)
 
-		print(json.dumps(self.blockchain, sort_keys=True, indent=4))
+		# print(json.dumps(self.blockchain, sort_keys=True, indent=4))
+		path = os.path.join(os.path.dirname(__file__), "data", "blockchains", self.chain_id[:8], "blockchain.json")
+		with open(path, 'w') as f:
+			f.write(json.dumps(self.blockchain, sort_keys=True, indent=4))
 
 
 	def hash_block(self, block):
@@ -30,4 +34,5 @@ class Miner():
 			if attr not in ["head", "body"]:
 				del block[attr]
 
-		return crypt.hash(json.dumps(block, sort_keys=True))
+		# return crypt.hash(json.dumps(block, sort_keys=True))
+		return crypt.hash("hiya mate")
