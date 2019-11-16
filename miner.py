@@ -7,6 +7,8 @@ class Miner():
 		self.priv, self.pub = crypt.gen_keys()
 		self.chain_id = crypt.hash(self.pub)
 		self.blockchain = []
+		self.chain_dir = os.path.join(os.path.dirname(__file__), "data", "blockchain", self.chain_id[:8])
+		os.makedirs(self.chain_dir)
 		self.run()
 
 
@@ -23,9 +25,7 @@ class Miner():
 			block["body"] = crypt.get_rand_str()
 			self.blockchain.append(block)
 
-		# print(json.dumps(self.blockchain, sort_keys=True, indent=4))
-		path = os.path.join(os.path.dirname(__file__), "data", "blockchains", self.chain_id[:8], "blockchain.json")
-		with open(path, 'w') as f:
+		with open(self.chain_dir + "/blockchain.json", 'w') as f:
 			f.write(json.dumps(self.blockchain, sort_keys=True, indent=4))
 
 
@@ -34,5 +34,4 @@ class Miner():
 			if attr not in ["head", "body"]:
 				del block[attr]
 
-		# return crypt.hash(json.dumps(block, sort_keys=True))
-		return crypt.hash("hiya mate")
+		return crypt.hash(json.dumps(block, sort_keys=True))
