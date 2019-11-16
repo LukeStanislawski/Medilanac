@@ -3,23 +3,30 @@ from flask import Flask, request
 import config
 
 app = Flask(__name__)
-blocks = []
+chunks = []
 
 
-@app.route("/retieve", methods=['POST'])
+@app.route("/retrieve", methods=['POST'])
 def get_blockchain():
-    global blocks
+    global chunks
     data = json.loads(request.data)
-    return json.dumps(blocks.pop(0))
+    i = 0
+    while i < len(chunks) and chunks[i]["head"]["chain_id"] in data["blacklist"]:
+        i += 1
+
+    if i < len(chunks):
+        return json.dumps(chunks.pop(i), sort_keys=True)
+    else:
+        return json.dumps([])
 
 
 @app.route("/submit", methods=['POST'])
 def post_blockchain():
-    global blocks
-    submitted_blocks = json.loads(request.data)
-    # blocks.extend(submitted_blocks)
-    print (json.dumps(submitted_blocks))
-    print(len(json.dumps(submitted_blocks)))
+    global chunks
+    data = json.loads(request.data)
+    chunks.append(data)
+    print (request.data)
+
     return '{"status":"accepted"}'
 
 

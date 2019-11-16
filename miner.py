@@ -23,11 +23,14 @@ class Miner():
 
 			# self.publish_block(self.blockchain[-1])
 			self.publish_chunks(chunks, len(self.blockchain))
+			block["foreign_chunks"] = self.get_foreign_chunks()
 
 			self.blockchain.append(block)
 
 			with open(self.chain_dir + "/blockchain.json", 'w') as f:
 				f.write(json.dumps(self.blockchain, sort_keys=True, indent=4))
+
+
 
 
 	def gen_genesis(self):
@@ -42,17 +45,21 @@ class Miner():
 	def gen_new_block(self):
 		block = {}
 		block["head"] = {}
-		block["head"]["prev_block_hash"] = self.hash_block(self.blockchain[-1])
+		block["head"]["prev_block_hash"] = self.hash_block(self.blockchain[-1], include_fc=True)
 		block["head"]["chain_id"] = self.chain_id
 		block["head"]["id"] = len(self.blockchain)
 		block["body"] = crypt.get_rand_str()
 		return block
 
 
-	def hash_block(self, block):
+	def hash_block(self, block, include_fc=False):
 		raw_block = {}
-		for attr in ["head", "body"]:
-			raw_block[attr] = block[attr]
+		attrs = ["head", "body"]
+		if include_fc: attrs.append("foreign_chunks")
+
+		for attr in attrs:
+			if attr in raw_block:
+				raw_block[attr] = block[attr]
 
 		return crypt.hash(json.dumps(raw_block, sort_keys=True))
 
@@ -67,25 +74,24 @@ class Miner():
 
 	def fragment(self, block):
 		data = json.dumps(block, sort_keys=True)
-		max_chunk_size = 100
 		chunks = []
 		start_i = 0
 
 		while start_i < len(data):
-			end_i = min(start_i + max_chunk_size, len(data))
+			end_i = min(start_i + config.max_chunk_size, len(data))
 			chunks.append(data[start_i:end_i])
 			start_i = end_i
 
 		return chunks
-		
+
 
 	def publish_chunk(self, chunk):
 		accepted = False
-		timeout = config.block_sub_timout
+		timeout = config.chunk_sub_timout
 
 		while not accepted and timeout > 0:
 			try:
-				r = self.http.request('POST', config.exchange_addr + '/submit',
+				r = self.http.request('POST', config.chunk_sub_addr,
 	                 headers={'Content-Type': 'application/json'},
 	                 body=json.dumps(chunk))
 
@@ -108,11 +114,35 @@ class Miner():
 		for chunk_i, data in enumerate(chunk_data):
 			chunk = {}
 			chunk["head"] = {}
-			chunk["head"]["branch_id"] = self.chain_id
+			chunk["head"]["chain_id"] = self.chain_id
 			chunk["head"]["block_id"] = block_id
 			chunk["head"]["chunk_id"] = chunk_i
 			chunk["data"] = data
 			chunk["hash"] = self.hash_chunk(chunk)
 			chunk["signature"] = crypt.sign(self.priv, chunk['hash'])
-
 			self.publish_chunk(chunk)
+
+
+	def get_foreign_chunks(self):
+		chunks = []
+		timeout = config.foreign_chunk_timout
+		data_out = {}
+		data_out["blacklist"] = [self.chain_id]
+
+		while len(chunks) < config.num_foreign_chunks and timeout > 0:
+			try:
+				r = self.http.request('POST', config.chunk_ret_addr,
+	                 headers={'Content-Type': 'application/json'},
+	                 body=json.dumps(data_out))
+				
+				response = json.loads(r.data)
+				chunks.append(response)
+			
+			except Exception as e:
+				print ("Error when retrieveing foreign chunks:")
+				print (str(e))
+			
+			timeout -= 1
+			time.sleep(config.miner_wait)
+
+		return chunks

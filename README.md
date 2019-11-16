@@ -8,6 +8,7 @@ email: psyls6@nottingham.edu.cn
 
  - Currently multiple miners are adding random ascii data to blocks on their own chain in parrallel.
  - Block is split into chunks and sent to an exchange
+ - Foreign chunks are downloaded from the exchange and added to block
 
 
 ## Prerequisites
@@ -21,7 +22,7 @@ The following software is required:
 
 ## Running the software
 
-*To run the exchange:*
+**To run the exchange:**
 
 Run the following command from inside the main project folder:
 
@@ -30,7 +31,7 @@ python exchange.py
 ```
 
 
-*To run the miners*
+**To run the miners**
 
 Run the following command from inside the main project folder:
 
