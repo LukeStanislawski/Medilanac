@@ -1,0 +1,12 @@
+[
+    {
+        "signature": "Xoh32fowi35sf2fpaoefj2opaej038ruy2093rio9uru3uq39a",
+        "head": {
+            "prev_block_hash": "hf249wdh89wh4r92hf8w4hfw9fh4w8hw498hfb4wu9",
+            "chain_id": "h298ch489hf89wyf98wh984h8jw9498tfgjipjewfgiw04",
+        },
+        "block": [
+            {"data": "Some example text"}
+        ]
+    }
+]
