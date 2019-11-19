@@ -1,6 +1,7 @@
 import sys, os
 import crypt, config
 import json, urllib3, time
+from zfec import easyfec
 
 class Miner():
 	def __init__(self):
@@ -11,26 +12,30 @@ class Miner():
 		os.makedirs(self.chain_dir)
 
 		self.http = urllib3.PoolManager()
+		self.encoder = easyfec.Encoder(config.ec_k, config.ec_m)
+		self.decoder = easyfec.Encoder(config.ec_k, config.ec_m)
 		self.main()
 
 
 	def main(self):
 		self.blockchain.append(self.gen_genesis())
 		
-		for i in range(config.num_blocks):
+		for block_id in range(len(self.blockchain), config.num_blocks):
 			block = self.gen_new_block()
-			chunks = self.fragment(json.dumps(block, sort_keys=True))
-
-			# self.publish_block(self.blockchain[-1])
-			self.publish_chunks(chunks, len(self.blockchain))
+			# print ("Generated block")
+			chunks = self.get_chunks(block, block_id)
+			# print ("Generated chunks")
+			self.publish_chunks(chunks)
+			# print ("Published chunks")
 			block["foreign_chunks"] = self.get_foreign_chunks()
+			# print ("Retrieved foreign chunks")
+
 
 			self.blockchain.append(block)
-
-			with open(self.chain_dir + "/blockchain.json", 'w') as f:
-				f.write(json.dumps(self.blockchain, sort_keys=True, indent=4))
+			self.write_blockchain()
 
 
+		self.write_blockchain()
 
 
 	def gen_genesis(self):
@@ -72,15 +77,22 @@ class Miner():
 		return crypt.hash(json.dumps(raw_chunk, sort_keys=True))
 
 
-	def fragment(self, block):
-		data = json.dumps(block, sort_keys=True)
+	def get_chunks(self, block, block_id):
 		chunks = []
-		start_i = 0
+		data = json.dumps(block, sort_keys=True).encode('utf-8')
+		c_datas = self.encoder.encode(data)
+		c_datas = [str(x) for x in c_datas]
 
-		while start_i < len(data):
-			end_i = min(start_i + config.max_chunk_size, len(data))
-			chunks.append(data[start_i:end_i])
-			start_i = end_i
+		for ci, c_data in enumerate(c_datas):
+			chunk = {}
+			chunk["head"] = {}
+			chunk["head"]["chain_id"] = self.chain_id
+			chunk["head"]["block_id"] = block_id
+			chunk["head"]["chunk_id"] = ci
+			chunk["data"] = c_data
+			chunk["hash"] = self.hash_chunk(chunk)
+			chunk["signature"] = crypt.sign(self.priv, chunk['hash'])
+			chunks.append(chunk)
 
 		return chunks
 
@@ -88,18 +100,20 @@ class Miner():
 	def publish_chunk(self, chunk):
 		accepted = False
 		timeout = config.chunk_sub_timout
+		chunk_str = json.dumps(chunk, sort_keys=True)
 
 		while not accepted and timeout > 0:
 			try:
 				r = self.http.request('POST', config.chunk_sub_addr,
 	                 headers={'Content-Type': 'application/json'},
-	                 body=json.dumps(chunk))
+	                 body=chunk_str)
 
 				response = json.loads(r.data)
 				if response["status"] == "accepted":
 					accepted = True
 			
 			except Exception as e:
+				print ("Error when publishing chunks:")
 				print (str(e))
 				accepted = False
 			
@@ -110,16 +124,8 @@ class Miner():
 			print("Error: exchange submission timeout for miner {}".format(self.chain_id[:8]))
 
 
-	def publish_chunks(self, chunk_data, block_id):
-		for chunk_i, data in enumerate(chunk_data):
-			chunk = {}
-			chunk["head"] = {}
-			chunk["head"]["chain_id"] = self.chain_id
-			chunk["head"]["block_id"] = block_id
-			chunk["head"]["chunk_id"] = chunk_i
-			chunk["data"] = data
-			chunk["hash"] = self.hash_chunk(chunk)
-			chunk["signature"] = crypt.sign(self.priv, chunk['hash'])
+	def publish_chunks(self, chunks):
+		for chunk_i, chunk in enumerate(chunks):
 			self.publish_chunk(chunk)
 
 
@@ -146,3 +152,7 @@ class Miner():
 			time.sleep(config.miner_wait)
 
 		return chunks
+
+	def write_blockchain(self):
+		with open(self.chain_dir + "/blockchain.json", 'w') as f:
+			f.write(json.dumps(self.blockchain, sort_keys=True, indent=4))

@@ -9,7 +9,7 @@ import sys, os
 num_miners = 3
 
 # Number of blocks each miner should generate (excluding genesis)
-num_blocks = 1
+num_blocks = 2
 
 # Path to blockchain dir
 blockchain_dir = os.path.join(os.path.dirname(__file__), "data", "blockchain")
@@ -50,3 +50,9 @@ max_chunk_size = 100
 
 # Number of foreign chunks added to each block
 num_foreign_chunks = 3
+
+# Erasure code k value: min number of chunk required to be able to reconstruct data
+ec_k = 4
+
+# Erasure code m value: total number of chunks to split data into
+ec_m = 5
