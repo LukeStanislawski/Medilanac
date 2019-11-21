@@ -15,8 +15,11 @@ def get_blockchain():
         i += 1
 
     if i < len(chunks):
-        return json.dumps(chunks.pop(i), sort_keys=True)
+        chunk = chunks.pop(i)
+        print ("Num chunks: {}".format(len(chunks)))
+        return json.dumps(chunk, sort_keys=True)
     else:
+        print ("Num chunks: {}".format(len(chunks)))
         return json.dumps([])
 
 
@@ -25,7 +28,8 @@ def post_blockchain():
     global chunks
     data = json.loads(request.data)
     chunks.append(data)
-    print (request.data)
+    print ("Num chunks: {}".format(len(chunks)))
+
 
     return '{"status":"accepted"}'
 

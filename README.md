@@ -11,10 +11,10 @@ This project is still in development, the main current functionalities of the pr
  - Currently multiple miners are adding randomly generated ascii data to blocks on their own chains in parrallel
  - Each block is split into erasure code chunks and sent to an exchange
  - Foreign chunks are downloaded from the exchange and added to each block before publishing the block to it's blockchain
+ - Data from a chain can be reconstructed from blocks on other chains
 
 ### TODO
 
-- Data reconstruction functionaity
 - Blockchain query functionality
 - Blockchain validation when accepting foreign chunks
 - Store non-ascii data

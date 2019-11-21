@@ -81,7 +81,7 @@ class Miner():
 		chunks = []
 		data = json.dumps(block, sort_keys=True).encode('utf-8')
 		c_datas = self.encoder.encode(data)
-		c_datas = [str(x) for x in c_datas]
+		c_datas = [x.decode('cp437') for x in c_datas]
 
 		for ci, c_data in enumerate(c_datas):
 			chunk = {}
@@ -142,7 +142,8 @@ class Miner():
 	                 body=json.dumps(data_out))
 				
 				response = json.loads(r.data)
-				chunks.append(response)
+				if response != []:
+					chunks.append(response)
 			
 			except Exception as e:
 				print ("Error when retrieveing foreign chunks:")
@@ -150,6 +151,10 @@ class Miner():
 			
 			timeout -= 1
 			time.sleep(config.miner_wait)
+
+		if len(chunks) < config.num_foreign_chunks:
+			print("Error: could not find enough chunks ({}/{}) ({})".format(len(chunks), config.num_foreign_chunks, self.chain_id[:8]))
+
 
 		return chunks
 
