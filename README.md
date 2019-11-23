@@ -46,7 +46,9 @@ conda install pycrypto=2.6.1 flask=1.1.1 urllib3=1.25.6
 
 ## Running the software
 
-**To run the exchange:**
+**1. Running the exchange:**
+
+First we need to launch the exchange, a simple web server that will run locally on your machine that merely serves the pupose of allowing different miners to exchange blocks. 
 
 Run the following command from inside the main project folder:
 
@@ -55,17 +57,29 @@ python exchange.py
 ```
 
 
-**To run the miners:**
+**2. Run the miners:**
 
-Run the following command from inside the main project folder:
+Next we will run the miners. The program will create multiple miner processes all generating and exchanging chunks between eachother. They will all write their respective blockchains as they are being generated to their respective folders in the `data/` directory within the project folder.
+
+Open a new terminal window, activate your environment, and run the following command from inside the main project folder:
 
 ```
 python main.py
 ```
 
+**3. Reconstructing a chain:**
+
+Copy the chain ID from the folder of the blockchain you wish to reconstruct and then move it to somewhere else on your machine so that we know it is not being used to reconstruct the blockchain.
+
+Run the following command from inside the main project folder replacing ```<chain_id>``` with the ID (or first 8 charachters of the ID of the chain you wish to reconstruct:
+
+```
+python reconstruct.py <chain_id>
+```
+
 ## Dependencies
 
-The following software is rewquired to run:
+The following dependencies are required to run the software and can be installed by following the installation instructions:
 
 - Python 3.7.5
 - pycrypto 2.6.1

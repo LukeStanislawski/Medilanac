@@ -56,4 +56,5 @@ def reconstruct_blocks(chunks):
 
 
 if __name__ == "__main__":
-	main("a708f995")
+	chain_id = sys.argv[1]
+	main(chain_id)

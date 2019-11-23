@@ -22,18 +22,11 @@ class Miner():
 		
 		for block_id in range(len(self.blockchain), config.num_blocks):
 			block = self.gen_new_block()
-			# print ("Generated block")
 			chunks = self.get_chunks(block, block_id)
-			# print ("Generated chunks")
 			self.publish_chunks(chunks)
-			# print ("Published chunks")
 			block["foreign_chunks"] = self.get_foreign_chunks()
-			# print ("Retrieved foreign chunks")
-
-
 			self.blockchain.append(block)
 			self.write_blockchain()
-
 
 		self.write_blockchain()
 
@@ -155,8 +148,8 @@ class Miner():
 		if len(chunks) < config.num_foreign_chunks:
 			print("Error: could not find enough chunks ({}/{}) ({})".format(len(chunks), config.num_foreign_chunks, self.chain_id[:8]))
 
-
 		return chunks
+
 
 	def write_blockchain(self):
 		with open(self.chain_dir + "/blockchain.json", 'w') as f:
