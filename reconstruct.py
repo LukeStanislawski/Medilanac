@@ -10,6 +10,7 @@ def main(branch_id):
 	chunks = find_chunks(branch_id, branch_paths)
 	blocks = reconstruct_blocks(chunks)
 	print (json.dumps(blocks, indent=4))
+	write_chain(blocks)
 	
 
 def get_bpaths():
@@ -53,6 +54,15 @@ def reconstruct_blocks(chunks):
 		blocks.append(json.loads(d_data))
 
 	return blocks
+
+
+def write_chain(blocks):
+	chain_id = blocks[-1]["head"]["chain_id"]
+	chain_dir = os.path.join(config.blockchain_dir, chain_id[:8])
+	os.makedirs(chain_dir)
+	with open(chain_dir + "/blockchain.json", 'w') as f:
+		f.write(json.dumps(blocks, sort_keys=True, indent=4))
+
 
 
 if __name__ == "__main__":

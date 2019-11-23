@@ -48,7 +48,7 @@ conda install pycrypto=2.6.1 flask=1.1.1 urllib3=1.25.6
 
 **1. Running the exchange:**
 
-First we need to launch the exchange, a simple web server that will run locally on your machine that merely serves the pupose of allowing different miners to exchange blocks. 
+First we need to launch the exchange, a simple web server that will run locally on your machine allowing different miners to exchange chunks of their blocks. 
 
 Run the following command from inside the main project folder:
 
@@ -59,7 +59,7 @@ python exchange.py
 
 **2. Run the miners:**
 
-Next we will run the miners. The program will create multiple miner processes all generating and exchanging chunks between eachother. They will all write their respective blockchains as they are being generated to their respective folders in the `data/` directory within the project folder.
+Next we will run the miners. The program will create multiple miner processes all generating and exchanging chunks between eachother via the exchange. They will all write their blockchains as they are being generated to their respective folders in the `data/blockchain` directory within the project folder.
 
 Open a new terminal window, activate your environment, and run the following command from inside the main project folder:
 
@@ -69,13 +69,15 @@ python main.py
 
 **3. Reconstructing a chain:**
 
-Copy the chain ID from the folder of the blockchain you wish to reconstruct and then move it to somewhere else on your machine so that we know it is not being used to reconstruct the blockchain.
+Copy the chain ID from the folder of the blockchain you wish to reconstruct and then move the folder to somewhere else on your machine so that we know it is not being used to reconstruct the blockchain.
 
-Run the following command from inside the main project folder replacing ```<chain_id>``` with the ID (or first 8 charachters of the ID of the chain you wish to reconstruct:
+Run the following command from inside the main project folder replacing `<chain_id>` with the ID (or first 8 charachters of the ID of the chain you wish to reconstruct:
 
 ```
 python reconstruct.py <chain_id>
 ```
+
+The script will create a new blockchain in the blockchain directory with the original blockchain (excluding the foreign chunks).
 
 ## Dependencies
 
