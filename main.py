@@ -6,7 +6,7 @@ import config
 
 def main():
     for i in range(config.num_miners):
-        p = Process(target=Miner)
+        p = Process(target=Miner, args=[i])
         p.start()
 
 

@@ -1,10 +1,12 @@
 import sys, os
 import crypt, config
+from data_generator import gen_sample_data
 import json, urllib3, time
 from zfec import easyfec
 
 class Miner():
-	def __init__(self):
+	def __init__(self, id):
+		self.id = id
 		self.blockchain = []
 		self.priv, self.pub = crypt.gen_keys()
 		self.chain_id = crypt.hash(self.pub)
@@ -19,16 +21,24 @@ class Miner():
 
 	def main(self):
 		self.blockchain.append(self.gen_genesis())
+		print("Miner {}: In itialised and genesis block added to chain. PubKey hash: {}..".format(self.id, self.chain_id[:8]))
+
 		
 		for block_id in range(len(self.blockchain), config.num_blocks):
 			block = self.gen_new_block()
 			chunks = self.get_chunks(block, block_id)
 			self.publish_chunks(chunks)
+			print("Miner {}: Published chunks for block {}".format(self.id, block_id))
 			block["foreign_chunks"] = self.get_foreign_chunks()
+			print("Miner {}: Downloaded all foreign chunks for block {}".format(self.id, block_id))
 			self.blockchain.append(block)
 			self.write_blockchain()
+			print("Miner {}: Added block {} to chain".format(self.id, block_id))
+
 
 		self.write_blockchain()
+		print("Miner {}: Terminated".format(self.id))
+
 
 
 	def gen_genesis(self):
@@ -46,7 +56,7 @@ class Miner():
 		block["head"]["prev_block_hash"] = self.hash_block(self.blockchain[-1], include_fc=True)
 		block["head"]["chain_id"] = self.chain_id
 		block["head"]["id"] = len(self.blockchain)
-		block["body"] = crypt.get_rand_str()
+		block["body"] = gen_sample_data(1)
 		return block
 
 
@@ -146,7 +156,7 @@ class Miner():
 			time.sleep(config.miner_wait)
 
 		if len(chunks) < config.num_foreign_chunks:
-			print("Error: could not find enough chunks ({}/{}) ({})".format(len(chunks), config.num_foreign_chunks, self.chain_id[:8]))
+			print("Warning: could not find enough chunks ({}/{}) ({})".format(len(chunks), config.num_foreign_chunks, self.chain_id[:8]))
 
 		return chunks
 

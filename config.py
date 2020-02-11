@@ -18,8 +18,8 @@ blockchain_dir = os.path.join(os.path.dirname(__file__), "data", "blockchain")
 # Exchange
 # --------
 
-# Exchange IP address
-exchange_ip = "127.0.0.1"
+# Exchange internal IP address
+exchange_ip = "localhost"
 exchange_port = 5000
 
 # Index of chunk submittion and retrieval
@@ -27,10 +27,11 @@ exchange_submit_index = "/submit"
 exchange_rerieve_index = "/retrieve"
 
 
-# Used internally, edit IP and port above
-exchange_addr = "http://{}:{}".format(exchange_ip, exchange_port)
-chunk_sub_addr = exchange_addr + exchange_submit_index
-chunk_ret_addr = exchange_addr + exchange_rerieve_index
+# Exchange public address (address miners can reach server on)
+exchange_pub_addr = "http://64e82222.ngrok.io"
+# exchange_pub_addr = "http://{}:{}".format(exchange_ip, exchange_port)
+chunk_sub_addr = exchange_pub_addr + exchange_submit_index
+chunk_ret_addr = exchange_pub_addr + exchange_rerieve_index
 
 
 # Miner
@@ -49,10 +50,13 @@ foreign_chunk_timout = 5
 max_chunk_size = 100
 
 # Number of foreign chunks added to each block
-num_foreign_chunks = 7
+num_foreign_chunks = 5
 
 # Erasure code k value: min number of chunk required to be able to reconstruct data
 ec_k = 4
 
 # Erasure code m value: total number of chunks to split data into
 ec_m = 5
+
+# Directory containing sample data to be added to blockchain
+sample_data_dir = "data/sample_data"
