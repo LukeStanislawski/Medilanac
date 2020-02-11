@@ -12,12 +12,13 @@ This project is still in development, the main current functionalities of the pr
  - Each block is split into erasure code chunks and sent to an exchange
  - Foreign chunks are downloaded from the exchange and added to each block before publishing the block to it's blockchain
  - Data from a chain can be reconstructed from blocks on other chains
+- Files can be converted to base64 and then stored as ascii on the blockchain
+
 
 ### TODO
 
 - Blockchain query functionality
 - Blockchain validation when accepting foreign chunks
-- Store non-ascii data
 
 
 ## Installation
