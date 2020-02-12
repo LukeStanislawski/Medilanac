@@ -3,35 +3,29 @@ from flask import Flask, request
 import config
 
 app = Flask(__name__)
-chunks = []
+branches = []
 
 
-@app.route("/retrieve", methods=['POST'])
-def get_blockchain():
-    global chunks
+@app.route("/submit-miner", methods=['POST'])
+def submit_miner():
+    # TODO: add validation
+    global branches
     data = json.loads(request.data)
-    i = 0
-    while i < len(chunks) and chunks[i]["head"]["chain_id"] in data["blacklist"]:
-        i += 1
-
-    if i < len(chunks):
-        chunk = chunks.pop(i)
-        print ("Num chunks: {}".format(len(chunks)))
-        return json.dumps(chunk, sort_keys=True)
-    else:
-        print ("Num chunks: {}".format(len(chunks)))
-        return json.dumps([])
-
-
-@app.route("/submit", methods=['POST'])
-def post_blockchain():
-    global chunks
-    data = json.loads(request.data)
-    chunks.append(data)
-    print ("Num chunks: {}".format(len(chunks)))
-
-
+    branch = {}
+    branch["id"] = data["branch_id"]
+    branch["address"] = data["branch_address"]
+    branches.append(branch)
+    print ("Num miners: {}".format(len(branches)))
     return '{"status":"accepted"}'
+
+
+@app.route("/get-miners", methods=['POST'])
+def get_miners():
+    # TODO: add validation
+    global branches
+    data = json.loads(request.data)
+    return json.dumps(branches)
+
 
 
  
