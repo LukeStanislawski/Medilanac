@@ -3,10 +3,14 @@ import crypt, config
 from data_generator import gen_sample_data
 import json, urllib3, time
 from zfec import easyfec
+from miner_server import Server
+from multiprocessing import Process
+
 
 class Miner():
-	def __init__(self, id):
+	def __init__(self, id, server_port):
 		self.id = id
+		self.server_port = server_port
 		self.blockchain = []
 		self.priv, self.pub = crypt.gen_keys()
 		self.chain_id = crypt.hash(self.pub)
@@ -16,7 +20,13 @@ class Miner():
 		self.http = urllib3.PoolManager()
 		self.encoder = easyfec.Encoder(config.ec_k, config.ec_m)
 		self.decoder = easyfec.Encoder(config.ec_k, config.ec_m)
+
+		p = Process(target=Server, args=[self.id, server_port])
+		p.start()
+
 		self.main()
+		time.sleep(1000)
+		p.join()
 
 
 	def main(self):

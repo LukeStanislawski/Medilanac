@@ -28,8 +28,8 @@ exchange_rerieve_index = "/retrieve"
 
 
 # Exchange public address (address miners can reach server on)
-exchange_pub_addr = "http://64e82222.ngrok.io"
-# exchange_pub_addr = "http://{}:{}".format(exchange_ip, exchange_port)
+# exchange_pub_addr = "http://64e82222.ngrok.io"
+exchange_pub_addr = "http://{}:{}".format(exchange_ip, exchange_port)
 chunk_sub_addr = exchange_pub_addr + exchange_submit_index
 chunk_ret_addr = exchange_pub_addr + exchange_rerieve_index
 
@@ -60,3 +60,6 @@ ec_m = 5
 
 # Directory containing sample data to be added to blockchain
 sample_data_dir = "data/sample_data"
+
+# Miner server internal IP address/domain
+miner_server_ip = "localhost"
