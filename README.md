@@ -1,4 +1,4 @@
-# Medichain
+# Medilanac
 
 Author: Luke Stanislawski
 
@@ -25,15 +25,15 @@ This project is still in development, the main current functionalities of the pr
 
 ### Prerequisites
 
-You are required to have [Anaconda Python](https://www.anaconda.com/) installed on your machine. Please note that Medichain has only been tested on Mac OSX.
+You are required to have [Anaconda Python](https://www.anaconda.com/) installed on your machine. Please note that medilanac has only been tested on Mac OSX.
 
 ### Creating a New Environment
 
 The following commands will create a new conda enviroment running the required version of Python (3.7):
 
 ```
-conda create -n medichain python=3.7
-conda activate medichain
+conda create -n medilanac python=3.7
+conda activate medilanac
 ```
 
 ### Installing Dependencies
