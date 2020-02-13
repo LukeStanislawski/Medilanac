@@ -1,6 +1,7 @@
-import os, json
+import os
+import json
 from flask import Flask, request
-import config
+from utils import config
 
 
 chain_id = None

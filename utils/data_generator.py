@@ -1,10 +1,9 @@
 import os
-from config import sample_data_dir as data_dir
 from os import listdir
 from os.path import isfile, join
 import random
-import config
-from file_encoder import encode
+from utils.config import sample_data_dir as data_dir
+from utils.file_encoder import encode
 
 
 def gen_sample_data(num_items=1):

@@ -1,10 +1,11 @@
-import sys, os, random
-import crypt, config
-from data_generator import gen_sample_data
-import json, urllib3, time
+import sys, os
+import random, time, json
+import urllib3
 from zfec import easyfec
-from miner_server import Server
 from multiprocessing import Process
+from utils import crypt, config
+from utils.data_generator import gen_sample_data
+from utils.miner_server import Server
 
 
 class Miner():

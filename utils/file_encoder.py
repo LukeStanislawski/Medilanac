@@ -1,4 +1,6 @@
-import json, base64, filecmp
+import json
+import base64
+import filecmp
 
 
 def encode(fpath):

@@ -1,7 +1,7 @@
 import sys, os
 from miner import Miner
 from multiprocessing import Process
-import config
+from utils import config
 
 
 def main():
