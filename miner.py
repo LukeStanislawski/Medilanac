@@ -22,24 +22,12 @@ class Miner():
 		self.encoder = easyfec.Encoder(config.ec_k, config.ec_m)
 		self.decoder = easyfec.Encoder(config.ec_k, config.ec_m)
 
-		p = Process(target=Server, args=[self.chain_id, server_port])
+		p = Process(target=Server, args=[self.id, self.chain_id, server_port])
 		p.start()
 
 		self.main()
-		# self.temp_main()
 		time.sleep(1000)
 		p.join()
-
-
-	def temp_main(self):
-		self.blockchain.append(self.gen_genesis())
-		self.blockchain.append(self.gen_genesis())
-		self.blockchain.append(self.gen_genesis())
-		self.publish_existence()
-		print("Published existence")
-		new_chunk = self.get_foreign_chunks2()
-		print("recieved new chunk")
-		print(new_chunk)
 
 
 	def main(self):
@@ -132,37 +120,6 @@ class Miner():
 		return chunks
 
 
-	# def publish_chunk(self, chunk):
-	# 	accepted = False
-	# 	timeout = config.chunk_sub_timout
-	# 	chunk_str = json.dumps(chunk, sort_keys=True)
-
-	# 	while not accepted and timeout > 0:
-	# 		try:
-	# 			r = self.http.request('POST', config.chunk_sub_addr,
-	#                  headers={'Content-Type': 'application/json'},
-	#                  body=chunk_str)
-
-	# 			response = json.loads(r.data)
-	# 			if response["status"] == "accepted":
-	# 				accepted = True
-			
-	# 		except Exception as e:
-	# 			print ("Error when publishing chunks:")
-	# 			print (str(e))
-	# 			accepted = False
-			
-	# 		timeout -= 1
-	# 		time.sleep(config.miner_wait)
-
-	# 	if not accepted:
-	# 		print("Error: exchange submission timeout for miner {}".format(self.chain_id[:8]))
-
-
-	# def publish_chunks(self, chunks):
-	# 	for chunk_i, chunk in enumerate(chunks):
-	# 		self.publish_chunk(chunk)
-
 	def write_chunks(self, chunks):
 		with open(self.chain_dir + "/chunks.json") as f:
 			e_chunks = json.loads(f.read())
@@ -171,39 +128,9 @@ class Miner():
 			f.write(json.dumps(e_chunks, indent=4))
 
 
-
-	# def get_foreign_chunks(self):
-	# 	chunks = []
-	# 	timeout = config.foreign_chunk_timout
-	# 	data_out = {}
-	# 	data_out["blacklist"] = [self.chain_id]
-
-	# 	while len(chunks) < config.num_foreign_chunks and timeout > 0:
-	# 		try:
-	# 			r = self.http.request('POST', config.chunk_ret_addr,
-	#                  headers={'Content-Type': 'application/json'},
-	#                  body=json.dumps(data_out))
-				
-	# 			response = json.loads(r.data)
-	# 			if response != []:
-	# 				chunks.append(response)
-			
-	# 		except Exception as e:
-	# 			print ("Error when retrieveing foreign chunks:")
-	# 			print (str(e))
-			
-	# 		timeout -= 1
-	# 		time.sleep(config.miner_wait)
-
-	# 	if len(chunks) < config.num_foreign_chunks:
-	# 		print("Warning: could not find enough chunks ({}/{}) ({})".format(len(chunks), config.num_foreign_chunks, self.chain_id[:8]))
-
-	# 	return chunks
-
-
 	def get_foreign_chunks(self):
 		chunks = []
-		timeout = config.foreign_chunk_timout
+		timeout = config.foreign_chunk_timout + config.num_foreign_chunks
 
 		while len(chunks) < config.num_foreign_chunks and timeout > 0:
 			miner = self.pick_miner()

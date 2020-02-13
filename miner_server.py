@@ -4,16 +4,21 @@ import config
 
 
 chain_id = None
-# app = None
+miner_id = None
 app = Flask(__name__)
 
 
 class Server():
-    def __init__(self, c_id, port):
+    def __init__(self, m_id, c_id, port):
+        self.m_id = m_id
         self.c_id = c_id
         self.port = port
+        
         global chain_id
+        global miner_id
         chain_id = self.c_id
+        miner_id = self.m_id
+        
         self.run()
 
     def run(self):

@@ -8,16 +8,17 @@ email: psyls6@nottingham.edu.cn
 
 This project is still in development, the main current functionalities of the project are as follows:
 
- - Currently multiple miners are adding randomly generated ascii data to blocks on their own chains in parrallel
- - Each block is split into erasure code chunks and sent to an exchange
- - Foreign chunks are downloaded from the exchange and added to each block before publishing the block to it's blockchain
- - Data from a chain can be reconstructed from blocks on other chains
-- Files can be converted to base64 and then stored as ascii on the blockchain
+- Currently multiple miners are adding files in the form of ascii text to blocks on their own chains in parrallel
+- Each miner announces their existence and network address that they can be reached on to an exchange server
+- Each block is split into erasure code chunks
+- Foreign chunks are downloaded directly from other miners on the network and added to each block before publishing the block to it's blockchain
+- Data from a chain can be reconstructed from chunks in blocks on other chains
+- Files can be converted from base64 ascii and reconstructed
 
 
 ### TODO
 
-- Blockchain query functionality
+- The ability to query a miner for data on their blockchain
 - Blockchain validation when accepting foreign chunks
 
 

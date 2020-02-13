@@ -52,16 +52,16 @@ miner_exist_timout = 3
 retrieve_miners_timout = 3
 
 #Wait time between attempts (seconds)
-miner_wait = 1
+miner_wait = 0.25
 
 # Number of attempts to retrieve foreign chunks from the server before timeout
-foreign_chunk_timout = 5
+foreign_chunk_timout = 3
 
 # Max size of chunk to split block into
 max_chunk_size = 100
 
 # Number of foreign chunks added to each block
-num_foreign_chunks = 5
+num_foreign_chunks = 11
 
 # Erasure code k value: min number of chunk required to be able to reconstruct data
 ec_k = 4

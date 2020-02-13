@@ -49,7 +49,7 @@ def reconstruct_blocks(chunks):
 		inds = [x["head"]["chunk_id"] for x in b_chunks]
 
 		d = Decoder(config.ec_k, config.ec_m)
-		d_data = d.decode(raw_chunks[:config.ec_k], inds[:config.ec_k], 1)
+		d_data = d.decode(raw_chunks[:config.ec_k], inds[:config.ec_k], 0)
 		d_data = d_data.decode('utf-8').rstrip('\x00')
 		blocks.append(json.loads(d_data))
 
