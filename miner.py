@@ -6,6 +6,7 @@ from multiprocessing import Process
 from utils import crypt, config
 from utils.data_generator import gen_sample_data
 from utils.miner_server import Server
+from utils.merkle import merkle_tree
 
 
 class Miner():
@@ -40,7 +41,6 @@ class Miner():
 		chunks = self.get_chunks(genesis, 0)
 		self.write_chunks(chunks)
 
-
 		for block_id in range(len(self.blockchain), config.num_blocks):
 			if block_id == 0:
 				block = self.gen_genesis()
@@ -55,10 +55,8 @@ class Miner():
 			self.write_blockchain()
 			print("Miner {}: Added block {} to chain".format(self.id, block_id))
 
-
 		self.write_blockchain()
 		print("Miner {}: Terminated".format(self.id))
-
 
 
 	def gen_genesis(self):
@@ -76,8 +74,8 @@ class Miner():
 		block["head"]["prev_block_hash"] = self.hash_block(self.blockchain[-1], include_fc=True)
 		block["head"]["chain_id"] = self.chain_id
 		block["head"]["id"] = len(self.blockchain)
-		# block["body"] = gen_sample_data(1)
-		block["body"] = crypt.get_rand_str()
+		block["body"] = gen_sample_data(num_items=5, rand_str=True, size=6)
+		block["head"]["merkle"] = merkle_tree(block["body"])
 		return block
 
 
