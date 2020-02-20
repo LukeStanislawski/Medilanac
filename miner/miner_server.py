@@ -1,7 +1,7 @@
 import os
 import json
 from flask import Flask, request
-from utils import config
+from utils.config import Config
 from utils.logging import Log
 
 
@@ -9,6 +9,7 @@ chain_id = None
 miner_id = None
 app = Flask(__name__)
 log = Log()
+config = Config()
 
 
 class Server():

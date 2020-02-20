@@ -2,9 +2,13 @@ import os
 from os import listdir
 from os.path import isfile, join
 import random
-from utils.config import sample_data_dir as data_dir
+from utils.config import Config
 from utils.file_encoder import encode
 from utils.crypt import get_rand_str
+
+
+config = Config()
+data_dir = config.sample_data_dir
 
 
 def gen_sample_data(num_items=1, rand_str=False, size=64):

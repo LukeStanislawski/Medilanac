@@ -1,7 +1,11 @@
 import sys, os
 import json
 from zfec.easyfec import Decoder
-from utils import crypt, config
+from utils import crypt
+from utils.config import Config
+
+
+config = Config()
 
 
 def main(branch_id):

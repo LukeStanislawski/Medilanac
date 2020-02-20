@@ -18,7 +18,7 @@ def merkle(tree):
 def hash_list(a):
 	b = []
 	for i in range(1, len(a), 2):
-		b.append(crypt.hash(a[i-1] + a[i])[:6])
+		b.append(crypt.hash(a[i-1] + a[i]))
 	if len(a) % 2 != 0:
 		b.append(a[-1])
 	return b

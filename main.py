@@ -1,7 +1,10 @@
 import sys, os
 from miner.miner import Miner
 from multiprocessing import Process
-from utils import config
+from utils.config import Config
+
+config = Config()
+config.validate()
 
 
 def main():

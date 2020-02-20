@@ -1,7 +1,8 @@
 import json
 from flask import Flask, request
-from utils import config
+from utils.config import Config
 
+config = Config()
 app = Flask(__name__)
 branches = []
 

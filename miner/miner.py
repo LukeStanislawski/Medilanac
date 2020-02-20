@@ -3,7 +3,8 @@ import random, time, json
 import urllib3
 from zfec import easyfec
 from multiprocessing import Process
-from utils import crypt, config
+from utils import crypt
+from utils.config import Config
 from utils.data_generator import gen_sample_data
 from utils.merkle import merkle_tree
 from utils.logging import Log
@@ -11,6 +12,7 @@ from miner.miner_server import Server
 
 
 log = Log()
+config = Config()
 
 
 class Miner():
@@ -79,7 +81,7 @@ class Miner():
 		block["head"]["prev_block_hash"] = self.hash_block(self.blockchain[-1], include_fc=True)
 		block["head"]["chain_id"] = self.chain_id
 		block["head"]["id"] = len(self.blockchain)
-		block["body"] = gen_sample_data(num_items=5, rand_str=True, size=6)
+		block["body"] = gen_sample_data(num_items=config.data_items_per_block, rand_str=True, size=6)
 		block["head"]["merkle"] = merkle_tree(block["body"])
 		return block
 
