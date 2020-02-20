@@ -1,5 +1,5 @@
 import sys, os
-from miner import Miner
+from miner.miner import Miner
 from multiprocessing import Process
 from utils import config
 

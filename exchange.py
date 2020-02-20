@@ -23,7 +23,7 @@ def submit_miner():
 def get_miners():
     # TODO: add validation
     global branches
-    data = json.loads(request.data)
+    # data = json.loads(request.data)
     return json.dumps(branches)
 
 

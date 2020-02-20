@@ -2,19 +2,23 @@ import os
 import json
 from flask import Flask, request
 from utils import config
+from utils.logging import Log
 
 
 chain_id = None
 miner_id = None
 app = Flask(__name__)
+log = Log()
 
 
 class Server():
-    def __init__(self, m_id, c_id, port):
+    def __init__(self, m_id, c_id, port, m_dir):
         self.m_id = m_id
         self.c_id = c_id
         self.port = port
-        
+        self.m_dir = m_dir
+        log.set_up(self.m_id, self.m_dir)
+
         global chain_id
         global miner_id
         chain_id = self.c_id
@@ -57,6 +61,15 @@ def get_blockchain():
     data = json.loads(request.data)
     blockchain = load_blockchain()
     return blockchain[int(data["block_id"])]
+
+
+@app.route("/blockchain-headders", methods=['POST'])
+def get_blockchain_headders():
+    global chain_id
+    # data = json.loads(request.data)
+    blockchain = load_blockchain()
+    b_heads = [x["head"] for x in blockchain]
+    return json.dumps(b_heads)
 
 
 @app.route("/get-chunk", methods=['POST'])

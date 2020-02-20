@@ -5,8 +5,12 @@ from zfec import easyfec
 from multiprocessing import Process
 from utils import crypt, config
 from utils.data_generator import gen_sample_data
-from utils.miner_server import Server
 from utils.merkle import merkle_tree
+from utils.logging import Log
+from miner.miner_server import Server
+
+
+log = Log()
 
 
 class Miner():
@@ -20,11 +24,13 @@ class Miner():
 		os.makedirs(self.chain_dir)
 		with open(self.chain_dir + "/chunks.json", 'w') as f: f.write("[]")
 
+		log.set_up(self.id, self.chain_dir)
+
 		self.http = urllib3.PoolManager()
 		self.encoder = easyfec.Encoder(config.ec_k, config.ec_m)
-		self.decoder = easyfec.Encoder(config.ec_k, config.ec_m)
+		self.decoder = easyfec.Decoder(config.ec_k, config.ec_m)
 
-		p = Process(target=Server, args=[self.id, self.chain_id, server_port])
+		p = Process(target=Server, args=[self.id, self.chain_id, server_port, self.chain_dir])
 		p.start()
 
 		self.main()
@@ -37,11 +43,11 @@ class Miner():
 		genesis = self.gen_genesis()
 		self.blockchain.append(genesis)
 		self.write_blockchain()
-		print("Miner {}: Initialised and genesis block added to chain. PubKey hash: {}..".format(self.id, self.chain_id[:8]))
+		log.info("Initialised. PubKey hash: {}..".format(self.id, self.chain_id[:8]))
 		chunks = self.get_chunks(genesis, 0)
 		self.write_chunks(chunks)
 
-		for block_id in range(len(self.blockchain), config.num_blocks):
+		for block_id in range(len(self.blockchain), config.num_blocks):			
 			if block_id == 0:
 				block = self.gen_genesis()
 			else:
@@ -53,10 +59,9 @@ class Miner():
 			block["foreign_chunks"] = self.get_foreign_chunks()
 			self.blockchain.append(block)
 			self.write_blockchain()
-			print("Miner {}: Added block {} to chain".format(self.id, block_id))
-
+			log.info("Added block {} to chain".format(self.id, block_id))
 		self.write_blockchain()
-		print("Miner {}: Terminated".format(self.id))
+		log.info("Terminated with {} chunks left to publish".format(self.id, len(self.load_local_chunks())))
 
 
 	def gen_genesis(self):
@@ -64,7 +69,7 @@ class Miner():
 		block["head"] = {}
 		block["head"]["chain_id"] = self.chain_id
 		block["head"]["id"] = 0
-		block["body"] = "This is the first block in the blockchain"
+		block["body"] = "This is the genesis block, the first block on the blockchain"
 		return block
 
 
@@ -145,14 +150,14 @@ class Miner():
 					chunks.append(response)
 			
 			except Exception as e:
-				print ("Error when retrieveing foreign chunk from miner {} at {}:".format(miner["id"][:8], miner["address"]))
-				print (str(e))
+				log.warning("Error when retrieveing foreign chunk from miner {} at {}:".format(miner["id"][:8], miner["address"]))
+				log.warning(str(e))
 			
 			timeout -= 1
 			time.sleep(config.miner_wait)
 
 		if len(chunks) < config.num_foreign_chunks:
-			print("Warning: could not find enough chunks ({}/{}) ({})".format(len(chunks), config.num_foreign_chunks, self.chain_id[:8]))
+			log.info("Chunks recieved: ({}/{}) ({})".format(len(chunks), config.num_foreign_chunks, self.chain_id[:8]))
 
 		return chunks
 
@@ -180,15 +185,15 @@ class Miner():
 					accepted = True
 			
 			except Exception as e:
-				print ("Error when publishing chunks:")
-				print (str(e))
+				log.warning("Error when publishing chunks:")
+				print(str(e))
 				accepted = False
 			
 			timeout -= 1
 			time.sleep(config.miner_wait)
 
 		if not accepted:
-			print("Error: exchange submission timeout for miner {}".format(self.chain_id[:8]))
+			log.warning("Exchange submission timeout for miner {}".format(self.chain_id[:8]))
 
 
 
@@ -204,14 +209,14 @@ class Miner():
 				
 				miners = json.loads(r.data)
 			except Exception as e:
-				print ("Error when retrieveing foreign chunks:")
-				print (str(e))
+				log.warning("Error when retrieveing foreign chunks:")
+				log.warning(str(e))
 			
 			timeout -= 1
 			time.sleep(config.miner_wait)
 
 		if len(miners) < 1:
-			print("Warning: could not miners list from exchange")
+			log.warning("Could not get miners list from exchange")
 
 		return miners
 
@@ -221,3 +226,9 @@ class Miner():
 		miners = [x for x in miners if x["id"] != self.chain_id]
 		c = random.randint(0, len(miners)-1)
 		return miners[c]
+
+
+	def load_local_chunks(self):
+		with open(os.path.join(self.chain_dir, "chunks.json")) as f:
+			chunks = json.loads(f.read())
+		return chunks
