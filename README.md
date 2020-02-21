@@ -16,10 +16,14 @@ This project is still in development, the main current functionalities of the pr
 - Files can be converted from base64 ascii and reconstructed
 
 
-### TODO
+### TODO - High Level
 
 - The ability to query a miner for data on their blockchain
 - Blockchain validation when accepting foreign chunks
+
+### TODO - Low Level
+
+- Sort out hashing: foreign chunks included or excluded?
 
 
 ## Installation

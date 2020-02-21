@@ -32,8 +32,7 @@ class Miner():
 		self.encoder = easyfec.Encoder(config.ec_k, config.ec_m)
 		self.decoder = easyfec.Decoder(config.ec_k, config.ec_m)
 
-		p = Process(target=Server, args=[self.id, self.chain_id, server_port, self.chain_dir])
-		p.start()
+		self.p_server = Process(target=Server, args=[self.id, self.chain_id, server_port, self.chain_dir])
 
 		self.main()
 		time.sleep(1000)
@@ -41,27 +40,43 @@ class Miner():
 
 
 	def main(self):
-		self.publish_existence()
+		log.info("Initialised. PubKey hash: {}..".format(self.id, self.chain_id[:8]))
+
+		# Generate genesis block
 		genesis = self.gen_genesis()
 		self.blockchain.append(genesis)
 		self.write_blockchain()
-		log.info("Initialised. PubKey hash: {}..".format(self.id, self.chain_id[:8]))
+
+		# Make chunks available
 		chunks = self.get_chunks(genesis, 0)
 		self.write_chunks(chunks)
 
+		# Start the miner server
+		self.p_server.start()
+		# Publish miner/branch existance to exchange for peer discovery
+		self.publish_existence()
+
+		# Generate a specific number of blocks as definied in config
 		for block_id in range(len(self.blockchain), config.num_blocks):			
 			if block_id == 0:
 				block = self.gen_genesis()
 			else:
 				block = self.gen_new_block()
 
+			# Generate chunks and make available
 			chunks = self.get_chunks(block, block_id)
 			self.write_chunks(chunks)
 
+			# Update block with chunk data
 			block["foreign_chunks"] = self.get_foreign_chunks()
+			block = self.update_chunk_merkle(block)
+
+			# Store and save block
 			self.blockchain.append(block)
 			self.write_blockchain()
+
 			log.info("Added block {} to chain".format(self.id, block_id))
+		
 		self.write_blockchain()
 		log.info("Terminated with {} chunks left to publish".format(self.id, len(self.load_local_chunks())))
 
@@ -82,7 +97,8 @@ class Miner():
 		block["head"]["chain_id"] = self.chain_id
 		block["head"]["id"] = len(self.blockchain)
 		block["body"] = gen_sample_data(num_items=config.data_items_per_block, rand_str=True, size=6)
-		block["head"]["merkle"] = merkle_tree(block["body"])
+		block["head"]["file_merkle"] = merkle_tree(block["body"])
+		block["head"]["chunk_merkle"] = [] # Updated later
 		return block
 
 
@@ -188,7 +204,7 @@ class Miner():
 			
 			except Exception as e:
 				log.warning("Error when publishing chunks:")
-				print(str(e))
+				log.warning(str(e))
 				accepted = False
 			
 			timeout -= 1
@@ -224,13 +240,43 @@ class Miner():
 
 
 	def pick_miner(self):
-		miners = self.get_miners()
-		miners = [x for x in miners if x["id"] != self.chain_id]
-		c = random.randint(0, len(miners)-1)
-		return miners[c]
+		valid = False
+		while not valid:
+			miners = self.get_miners()
+			miners = [x for x in miners if x["id"] != self.chain_id]
+			miner = miners[random.randint(0, len(miners)-1)]
+			valid = self.validate_miner(miner)
+			valid = True
+		return miner
+
+
+	def validate_miner(self, miner):
+		blockchain = self.fetch_headders(miner["address"])
+		return True
+
+
+	def fetch_headders(self, addr):
+		try:
+			r = self.http.request('POST', addr + "/blockchain-headders",
+                 headers={'Content-Type': 'application/json'},
+                 body="{}")
+			
+			blockchain = json.loads(r.data)
+			return blockchain
+		except Exception as e:
+			log.warning("Error when retrieveing foreign chunks:")
+			log.warning(str(e))
+			return None
 
 
 	def load_local_chunks(self):
 		with open(os.path.join(self.chain_dir, "chunks.json")) as f:
 			chunks = json.loads(f.read())
 		return chunks
+
+
+	def update_chunk_merkle(self, block):
+		hashes = [x["hash"] for x in block["foreign_chunks"]]
+		merkle = merkle_tree(hashes)
+		block["head"]["chunk_merkle"] = merkle[0:-1]
+		return block
