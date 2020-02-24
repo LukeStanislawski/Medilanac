@@ -43,35 +43,43 @@ class Miner():
 		log.info("Initialised. PubKey hash: {}..".format(self.id, self.chain_id[:8]))
 
 		# Generate genesis block
+		log.debug("Generating genesis block")
 		genesis = self.gen_genesis()
 		self.blockchain.append(genesis)
 		self.write_blockchain()
 
 		# Make chunks available
+		log.debug("Making chunks available")
 		chunks = self.get_chunks(genesis, 0)
 		self.write_chunks(chunks)
 
 		# Start the miner server
+		log.debug("Starting miner server")
 		self.p_server.start()
 		# Publish miner/branch existance to exchange for peer discovery
+		log.debug("Publishing existence")
 		self.publish_existence()
 
 		# Generate a specific number of blocks as definied in config
 		for block_id in range(len(self.blockchain), config.num_blocks):			
+			log.debug("Generation of block {} commenced".format(block_id))
 			if block_id == 0:
 				block = self.gen_genesis()
 			else:
 				block = self.gen_new_block()
 
 			# Generate chunks and make available
+			log.debug("Generating chunks and writing to file")
 			chunks = self.get_chunks(block, block_id)
 			self.write_chunks(chunks)
 
 			# Update block with chunk data
+			log.debug("Updating block with chunk data")
 			block["foreign_chunks"] = self.get_foreign_chunks()
 			block = self.update_chunk_merkle(block)
 
 			# Store and save block
+			log.debug("Storing and saving block")
 			self.blockchain.append(block)
 			self.write_blockchain()
 
@@ -93,7 +101,8 @@ class Miner():
 	def gen_new_block(self):
 		block = {}
 		block["head"] = {}
-		block["head"]["prev_block_hash"] = self.hash_block(self.blockchain[-1], include_fc=True)
+		block["head"]["prev_block_hash"] = self.hash_block(self.blockchain[-1])
+		block["head"]["prev_block_head_hash"] = self.hash_block(self.blockchain[-1], attrs=["head"])
 		block["head"]["chain_id"] = self.chain_id
 		block["head"]["id"] = len(self.blockchain)
 		block["body"] = gen_sample_data(num_items=config.data_items_per_block, rand_str=True, size=6)
@@ -102,13 +111,11 @@ class Miner():
 		return block
 
 
-	def hash_block(self, block, include_fc=False):
+	def hash_block(self, block, attrs=["head", "body", "foreign_chunks"]):
 		raw_block = {}
-		attrs = ["head", "body"]
-		if include_fc: attrs.append("foreign_chunks")
 
 		for attr in attrs:
-			if attr in raw_block:
+			if attr in block:
 				raw_block[attr] = block[attr]
 
 		return crypt.hash(json.dumps(raw_block, sort_keys=True))
@@ -256,17 +263,18 @@ class Miner():
 
 
 	def fetch_headders(self, addr):
+		blockchain = None
 		try:
 			r = self.http.request('POST', addr + "/blockchain-headders",
                  headers={'Content-Type': 'application/json'},
                  body="{}")
 			
 			blockchain = json.loads(r.data)
-			return blockchain
 		except Exception as e:
 			log.warning("Error when retrieveing foreign chunks:")
 			log.warning(str(e))
-			return None
+		
+		return blockchain
 
 
 	def load_local_chunks(self):

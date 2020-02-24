@@ -24,7 +24,7 @@ class Log():
 
 	def get_str(self):
 		dt = datetime.now().strftime("%d/%m/%Y, %H:%M:%S")
-		return "[{}] [{}] Miner {}: {}".format(dt, "{}", self.id, "{}")
+		return "[{}] [{}] Miner {}: {}\n".format(dt, "{}", self.id, "{}")
 
 
 	def write_tf(self, msg):

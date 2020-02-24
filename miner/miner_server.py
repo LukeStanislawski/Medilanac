@@ -74,7 +74,7 @@ def get_blockchain_headders():
 
 
 @app.route("/get-chunk", methods=['POST'])
-def get_chunk():
+def get_chunks():
     global chain_id
     # data = json.loads(request.data)
     chunk = load_chunk()
