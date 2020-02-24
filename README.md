@@ -46,7 +46,7 @@ conda activate medilanac
 The following commands will install all the necessary Python libraries. Please execute them in the order given, answering 'y' when prompted:
 
 ```
-pip install zfec
+pip install zfec pytest
 conda install pycrypto=2.6.1 flask=1.1.1 urllib3=1.25.6
 ```
 
@@ -85,6 +85,14 @@ python reconstruct.py <chain_id>
 
 The script will create a new blockchain in the blockchain directory with the original blockchain (excluding the foreign chunks).
 
+## Testing
+
+The tests can be run using pytest with the following command:
+
+```
+py.test
+```
+
 ## Dependencies
 
 The following dependencies are required to run the software and can be installed by following the installation instructions:
@@ -94,3 +102,4 @@ The following dependencies are required to run the software and can be installed
 - flask 1.1.1
 - urllib3 1.25.6
 - zfec 1.5.3
+- pytest 5.3.5

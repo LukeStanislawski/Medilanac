@@ -16,7 +16,7 @@ config = Config()
 
 
 class Miner():
-	def __init__(self, id, server_port):
+	def __init__(self, id, server_port, test=False):
 		self.id = id
 		self.server_port = server_port
 		self.blockchain = []
@@ -34,7 +34,9 @@ class Miner():
 
 		self.p_server = Process(target=Server, args=[self.id, self.chain_id, server_port, self.chain_dir])
 
-		self.main()
+		if not test:
+			self.main()
+		
 		time.sleep(1000)
 		p.join()
 
