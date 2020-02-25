@@ -7,19 +7,33 @@ class Log():
 		self.dir = dir
 		self.log_file = os.path.join(self.dir, "log.txt")
 
+		self.p_warnings = True
+		self.w_warnings = True
+		self.p_info = True
+		self.w_info = True
+		self.p_debug = False
+		self.w_debug = True
+
 
 	def warning(self, msg):
-		print("Miner {} WARNING: {}".format(self.id, msg))
-		self.write_tf(self.get_str().format("WARNING", msg))
+		if self.p_warnings:
+			print("Miner {} WARNING: {}".format(self.id, msg))
+		if self.w_warnings:
+			self.write_tf(self.get_str().format("WARNING", msg))
 
 
 	def info(self, msg):
-		print("Miner {}: {}".format(self.id, msg))
-		self.write_tf(self.get_str().format("INFO", msg))
+		if self.p_info:
+			print("Miner {}: {}".format(self.id, msg))
+		if self.w_info:
+			self.write_tf(self.get_str().format("INFO", msg))
 
 
 	def debug(self, msg):
-		self.write_tf(self.get_str().format("DEBUG", msg))
+		if self.p_debug:
+			print("Miner {}: {}".format(self.id, msg))
+		if self.w_debug:
+			self.write_tf(self.get_str().format("DEBUG", msg))
 
 
 	def get_str(self):

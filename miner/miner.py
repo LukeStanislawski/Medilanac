@@ -85,7 +85,7 @@ class Miner():
 			self.blockchain.append(block)
 			self.write_blockchain()
 
-			log.info("Added block {} to chain".format(self.id, block_id))
+			log.info("Added block {} to chain".format(block_id))
 		
 		self.write_blockchain()
 		log.info("Terminated with {} chunks left to publish".format(self.id, len(self.load_local_chunks())))
@@ -166,6 +166,7 @@ class Miner():
 		while len(chunks) < config.num_foreign_chunks and timeout > 0:
 			miner = self.pick_miner()
 			address = miner["address"] + "/get-chunk"
+			log.debug("Fetching chunk from {}".format(address))
 
 			try:
 				r = self.http.request('POST', address,
@@ -175,6 +176,7 @@ class Miner():
 				response = json.loads(r.data)
 				if "status" not in response:
 					chunks.append(response)
+					log.debug("Chunk retrieved from {}".format(address))
 			
 			except Exception as e:
 				log.warning("Error when retrieveing foreign chunk from miner {} at {}:".format(miner["id"][:8], miner["address"]))
