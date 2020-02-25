@@ -2,7 +2,11 @@ from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.Hash import SHA256
 from Crypto.Signature import PKCS1_v1_5
-import hashlib, string, random, json, base64
+import hashlib
+import string
+import random
+import json
+import base64
 
 
 def hash(digest):
@@ -53,6 +57,23 @@ def verify(public_key, body, signature):
     bytes_code = str(body).encode('utf-8')
     rsakey = RSA.importKey(public_key)
     return rsakey.verify(bytes_code, (signature, None))
+
+
+def hash_block(block, attrs=["head", "body", "foreign_chunks"]):
+    raw_block = {}
+
+    for attr in attrs:
+        if attr in block:
+            raw_block[attr] = block[attr]
+    return hash(json.dumps(raw_block, sort_keys=True))
+
+
+def hash_chunk(chunk, attrs=["head", "data"]):
+    raw_chunk = {}
+    for attr in attrs:
+        raw_chunk[attr] = chunk[attr]
+
+    return hash(json.dumps(raw_chunk, sort_keys=True))
     
 
 def get_rand_str(size=64, chars=string.ascii_uppercase + string.ascii_lowercase + string.digits):

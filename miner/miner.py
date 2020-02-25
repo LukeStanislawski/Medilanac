@@ -37,8 +37,8 @@ class Miner():
 		if not test:
 			self.main()
 		
-		time.sleep(1000)
-		p.join()
+			time.sleep(1000)
+			p.join()
 
 
 	def main(self):
@@ -103,32 +103,14 @@ class Miner():
 	def gen_new_block(self):
 		block = {}
 		block["head"] = {}
-		block["head"]["prev_block_hash"] = self.hash_block(self.blockchain[-1])
-		block["head"]["prev_block_head_hash"] = self.hash_block(self.blockchain[-1], attrs=["head"])
+		block["head"]["prev_block_hash"] = crypt.hash_block(self.blockchain[-1])
+		block["head"]["prev_block_head_hash"] = crypt.hash_block(self.blockchain[-1], attrs=["head"])
 		block["head"]["chain_id"] = self.chain_id
 		block["head"]["id"] = len(self.blockchain)
 		block["body"] = gen_sample_data(num_items=config.data_items_per_block, rand_str=True, size=6)
 		block["head"]["file_merkle"] = merkle_tree(block["body"])
 		block["head"]["chunk_merkle"] = [] # Updated later
 		return block
-
-
-	def hash_block(self, block, attrs=["head", "body", "foreign_chunks"]):
-		raw_block = {}
-
-		for attr in attrs:
-			if attr in block:
-				raw_block[attr] = block[attr]
-
-		return crypt.hash(json.dumps(raw_block, sort_keys=True))
-
-
-	def hash_chunk(self, chunk):
-		raw_chunk = {}
-		for attr in ["head", "data"]:
-			raw_chunk[attr] = chunk[attr]
-
-		return crypt.hash(json.dumps(raw_chunk, sort_keys=True))
 
 
 	def get_chunks(self, block, block_id):
@@ -144,7 +126,7 @@ class Miner():
 			chunk["head"]["block_id"] = block_id
 			chunk["head"]["chunk_id"] = ci
 			chunk["data"] = c_data
-			chunk["hash"] = self.hash_chunk(chunk)
+			chunk["hash"] = crypt.hash_chunk(chunk)
 			chunk["signature"] = crypt.sign(self.priv, chunk['hash'])
 			chunks.append(chunk)
 
