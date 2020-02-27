@@ -7,10 +7,10 @@ class Config():
 		# ----
 
 		# Number of miners to create
-		self.num_miners = 3
+		self.num_miners = 5
 
 		# Number of blocks each miner should generate (excluding genesis)
-		self.num_blocks = 3
+		self.num_blocks = 5
 
 		# Number of foreign chunks added to each block
 		self.num_foreign_chunks = 8
@@ -19,6 +19,10 @@ class Config():
 		self.blockchain_dir = os.path.join(
 			os.path.dirname(os.path.dirname(__file__)), 
 			"data", "blockchain")
+
+		self.test_data_dir = os.path.join(
+			os.path.dirname(os.path.dirname(__file__)),
+			"test", "test_data")
 
 
 		# Exchange

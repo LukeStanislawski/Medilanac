@@ -1,5 +1,7 @@
 import sys, os
-import random, time, json
+import random
+import time
+import json
 import urllib3
 from zfec import easyfec
 from multiprocessing import Process
@@ -7,6 +9,7 @@ from utils import crypt
 from utils.config import Config
 from utils.data_generator import gen_sample_data
 from utils.merkle import merkle_tree
+from utils.validator import validate_headders
 from utils.logging import Log
 from miner.miner_server import Server
 
@@ -96,6 +99,7 @@ class Miner():
 		block["head"] = {}
 		block["head"]["chain_id"] = self.chain_id
 		block["head"]["id"] = 0
+		block["head"]["pub_key"] = self.pub.hex()
 		block["body"] = "This is the genesis block, the first block on the blockchain"
 		return block
 
@@ -106,10 +110,12 @@ class Miner():
 		block["head"]["prev_block_hash"] = crypt.hash_block(self.blockchain[-1])
 		block["head"]["prev_block_head_hash"] = crypt.hash_block(self.blockchain[-1], attrs=["head"])
 		block["head"]["chain_id"] = self.chain_id
+		block["head"]["pub_key"] = self.pub.hex()
 		block["head"]["id"] = len(self.blockchain)
 		block["body"] = gen_sample_data(num_items=config.data_items_per_block, rand_str=True, size=6)
 		block["head"]["file_merkle"] = merkle_tree(block["body"])
 		block["head"]["chunk_merkle"] = [] # Updated later
+		block["head"]["signature"] = ""
 		return block
 
 
@@ -207,7 +213,6 @@ class Miner():
 			log.warning("Exchange submission timeout for miner {}".format(self.chain_id[:8]))
 
 
-
 	def get_miners(self):
 		miners = []
 		timeout = config.retrieve_miners_timout
@@ -246,6 +251,7 @@ class Miner():
 	def validate_miner(self, miner):
 		blockchain = self.fetch_headders(miner["address"])
 		return True
+		return validate_headders(blockchain)
 
 
 	def fetch_headders(self, addr):
