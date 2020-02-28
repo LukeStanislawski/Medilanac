@@ -69,8 +69,12 @@ def get_blockchain_headders():
     global chain_id
     # data = json.loads(request.data)
     blockchain = load_blockchain()
-    b_heads = [x["head"] for x in blockchain]
-    return json.dumps(b_heads)
+    bc = []
+    for b in blockchain:
+        nb = {}
+        nb["head"] = b["head"]
+        bc.append(nb)
+    return json.dumps(bc)
 
 
 @app.route("/get-chunk", methods=['POST'])

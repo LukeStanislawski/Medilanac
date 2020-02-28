@@ -101,6 +101,7 @@ class Miner():
 		block["head"]["id"] = 0
 		block["head"]["pub_key"] = self.pub.hex()
 		block["body"] = "This is the genesis block, the first block on the blockchain"
+		
 		return block
 
 
@@ -116,6 +117,7 @@ class Miner():
 		block["head"]["file_merkle"] = merkle_tree(block["body"])
 		block["head"]["chunk_merkle"] = [] # Updated later
 		block["head"]["signature"] = ""
+		
 		return block
 
 
@@ -142,7 +144,9 @@ class Miner():
 	def write_chunks(self, chunks):
 		with open(self.chain_dir + "/chunks.json") as f:
 			e_chunks = json.loads(f.read())
+		
 		e_chunks.extend(chunks)
+		
 		with open(self.chain_dir + "/chunks.json", 'w') as f:
 			f.write(json.dumps(e_chunks, indent=4))
 
@@ -239,19 +243,25 @@ class Miner():
 
 	def pick_miner(self):
 		valid = False
+		
 		while not valid:
 			miners = self.get_miners()
 			miners = [x for x in miners if x["id"] != self.chain_id]
 			miner = miners[random.randint(0, len(miners)-1)]
 			valid = self.validate_miner(miner)
-			valid = True
+		
 		return miner
 
 
 	def validate_miner(self, miner):
 		blockchain = self.fetch_headders(miner["address"])
-		return True
-		return validate_headders(blockchain)
+		es = validate_headders(blockchain)
+		
+		if len(es) > 0:
+			log.debug("Blockchain invalid:{}".format("\n    ".join(es)))
+			return False
+		else:
+			return True
 
 
 	def fetch_headders(self, addr):
@@ -272,6 +282,7 @@ class Miner():
 	def load_local_chunks(self):
 		with open(os.path.join(self.chain_dir, "chunks.json")) as f:
 			chunks = json.loads(f.read())
+		
 		return chunks
 
 
@@ -279,4 +290,5 @@ class Miner():
 		hashes = [x["hash"] for x in block["foreign_chunks"]]
 		merkle = merkle_tree(hashes)
 		block["head"]["chunk_merkle"] = merkle[0:-1]
+		
 		return block
