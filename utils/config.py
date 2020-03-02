@@ -58,7 +58,7 @@ class Config():
 	miner_exist_timout = 3
 
 	# Number of attempts to submit miner existence to the server before timeout
-	retrieve_miners_timout = 3
+	retrieve_miners_timout = 5
 
 	#Wait time between attempts (seconds)
 	miner_wait = 0.25
@@ -83,6 +83,9 @@ class Config():
 
 	# Miner server internal IP address/domain
 	miner_server_ip = "localhost"
+
+	# Display http requests recieved by miner server
+	display_http = False
 
 
 

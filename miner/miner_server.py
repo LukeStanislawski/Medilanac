@@ -1,14 +1,14 @@
 import os
 import json
+import logging
 from flask import Flask, request
 from utils.config import Config
-from utils.logging import Log
+from miner.miner_log import MinerLog as Log
 
 
 chain_id = None
 miner_id = None
 app = Flask(__name__)
-log = Log()
 
 
 class Server():
@@ -17,12 +17,17 @@ class Server():
         self.c_id = c_id
         self.port = port
         self.m_dir = m_dir
-        log.set_up(self.m_id, self.m_dir)
+        # log.set_up(self.m_id, self.m_dir)
 
         global chain_id
         global miner_id
         chain_id = self.c_id
         miner_id = self.m_id
+
+        if not Config.display_http:
+            log = logging.getLogger('werkzeug')
+            log.setLevel(logging.ERROR)
+            
         
         self.run()
 
