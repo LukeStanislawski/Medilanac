@@ -7,8 +7,7 @@ from utils.file_encoder import encode
 from utils.crypt import get_rand_str
 
 
-config = Config()
-data_dir = config.sample_data_dir
+data_dir = Config.sample_data_dir
 
 
 def gen_sample_data(num_items=1, rand_str=False, size=64):

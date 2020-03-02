@@ -9,7 +9,6 @@ chain_id = None
 miner_id = None
 app = Flask(__name__)
 log = Log()
-config = Config()
 
 
 class Server():
@@ -30,19 +29,19 @@ class Server():
     def run(self):
         global app
         
-        app.run(debug=False, host=config.miner_server_ip, port=self.port)
+        app.run(debug=False, host=Config.miner_server_ip, port=self.port)
 
 
 
 def load_blockchain():
-    fpath = os.path.join(config.blockchain_dir, chain_id[:8], "blockchain.json")
+    fpath = os.path.join(Config.blockchain_dir, chain_id[:8], "blockchain.json")
     with open(fpath) as f:
         blockchain = f.read()
     return json.loads(blockchain)
 
 
 def load_chunk():
-    fpath = os.path.join(config.blockchain_dir, chain_id[:8], "chunks.json")
+    fpath = os.path.join(Config.blockchain_dir, chain_id[:8], "chunks.json")
     with open(fpath) as f:
         chunks = json.loads(f.read())
 

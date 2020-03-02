@@ -2,7 +2,6 @@ import json
 from flask import Flask, request
 from utils.config import Config
 
-config = Config()
 app = Flask(__name__)
 branches = []
 
@@ -31,4 +30,4 @@ def get_miners():
 
  
 if __name__ == "__main__":
-	app.run(debug=True, host=config.exchange_ip, port=config.exchange_port)
+	app.run(debug=True, host=Config.exchange_ip, port=Config.exchange_port)

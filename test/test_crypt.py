@@ -1,8 +1,8 @@
 import sys, os
 sys.path.insert(0,os.path.dirname(os.path.dirname(__file__)))
-
 import pytest
 from utils import crypt
+
 
 def test_hash():
 	o = "64ec88ca00b268e5ba1a35678a1b5316d212f4f366b2477232534a8aeca37f3c"

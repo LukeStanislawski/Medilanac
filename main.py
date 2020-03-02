@@ -3,13 +3,11 @@ from miner.miner import Miner
 from multiprocessing import Process
 from utils.config import Config
 
-config = Config()
-
 
 def main():
-    config.validate()
+    Config.validate()
 
-    for i in range(config.num_miners):
+    for i in range(Config.num_miners):
         p = Process(target=Miner, args=[i, i+5001])
         p.start()
 

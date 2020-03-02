@@ -5,8 +5,6 @@ from utils import crypt
 from utils.config import Config
 
 
-config = Config()
-
 
 def main(branch_id):
 	chunks = []
@@ -18,7 +16,7 @@ def main(branch_id):
 	
 
 def get_bpaths():
-	d = config.blockchain_dir
+	d = Config.blockchain_dir
 	branch_dirs = [os.path.join(d, o) for o in os.listdir(d) if os.path.isdir(os.path.join(d,o))]
 	branch_paths = [os.path.join(d, "blockchain.json") for d in branch_dirs]
 	return branch_paths
@@ -52,8 +50,8 @@ def reconstruct_blocks(chunks):
 		raw_chunks = [bytes(x["data"], 'utf-8') for x in b_chunks]
 		inds = [x["head"]["chunk_id"] for x in b_chunks]
 
-		d = Decoder(config.ec_k, config.ec_m)
-		d_data = d.decode(raw_chunks[:config.ec_k], inds[:config.ec_k], 0)
+		d = Decoder(Config.ec_k, Config.ec_m)
+		d_data = d.decode(raw_chunks[:Config.ec_k], inds[:Config.ec_k], 0)
 		d_data = d_data.decode('utf-8').rstrip('\x00')
 		blocks.append(json.loads(d_data))
 
@@ -62,7 +60,7 @@ def reconstruct_blocks(chunks):
 
 def write_chain(blocks):
 	chain_id = blocks[-1]["head"]["chain_id"]
-	chain_dir = os.path.join(config.blockchain_dir, chain_id[:8])
+	chain_dir = os.path.join(Config.blockchain_dir, chain_id[:8])
 	os.makedirs(chain_dir)
 	with open(chain_dir + "/blockchain.json", 'w') as f:
 		f.write(json.dumps(blocks, sort_keys=True, indent=4))

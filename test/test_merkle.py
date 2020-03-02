@@ -1,8 +1,8 @@
 import sys, os
 sys.path.insert(0,os.path.dirname(os.path.dirname(__file__)))
-
 import pytest
 from utils.merkle import merkle_tree
+
 
 def test_merkle_tree():
 	i = ["a", "b", "c", "d"]

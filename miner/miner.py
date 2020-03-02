@@ -15,8 +15,6 @@ from miner.miner_server import Server
 
 
 log = Log()
-config = Config()
-
 
 class Miner():
 	def __init__(self, id, server_port, test=False):
@@ -25,15 +23,15 @@ class Miner():
 		self.blockchain = []
 		self.priv, self.pub = crypt.gen_keys()
 		self.chain_id = crypt.hash(self.pub)
-		self.chain_dir = os.path.join(config.blockchain_dir, self.chain_id[:8])
+		self.chain_dir = os.path.join(Config.blockchain_dir, self.chain_id[:8])
 		os.makedirs(self.chain_dir)
 		with open(self.chain_dir + "/chunks.json", 'w') as f: f.write("[]")
 
 		log.set_up(self.id, self.chain_dir)
 
 		self.http = urllib3.PoolManager()
-		self.encoder = easyfec.Encoder(config.ec_k, config.ec_m)
-		self.decoder = easyfec.Decoder(config.ec_k, config.ec_m)
+		self.encoder = easyfec.Encoder(Config.ec_k, Config.ec_m)
+		self.decoder = easyfec.Decoder(Config.ec_k, Config.ec_m)
 
 		self.p_server = Process(target=Server, args=[self.id, self.chain_id, server_port, self.chain_dir])
 
@@ -65,8 +63,8 @@ class Miner():
 		log.debug("Publishing existence")
 		self.publish_existence()
 
-		# Generate a specific number of blocks as definied in config
-		for block_id in range(len(self.blockchain), config.num_blocks):			
+		# Generate a specific number of blocks as definied in Config
+		for block_id in range(len(self.blockchain), Config.num_blocks):			
 			log.debug("Generation of block {} commenced".format(block_id))
 			if block_id == 0:
 				block = self.gen_genesis()
@@ -113,7 +111,7 @@ class Miner():
 		block["head"]["chain_id"] = self.chain_id
 		block["head"]["pub_key"] = self.pub.hex()
 		block["head"]["id"] = len(self.blockchain)
-		block["body"] = gen_sample_data(num_items=config.data_items_per_block, rand_str=True, size=6)
+		block["body"] = gen_sample_data(num_items=Config.data_items_per_block, rand_str=True, size=6)
 		block["head"]["file_merkle"] = merkle_tree(block["body"])
 		block["head"]["chunk_merkle"] = [] # Updated later
 		block["head"]["signature"] = ""
@@ -153,9 +151,9 @@ class Miner():
 
 	def get_foreign_chunks(self):
 		chunks = []
-		timeout = config.foreign_chunk_timout + config.num_foreign_chunks
+		timeout = Config.foreign_chunk_timout + Config.num_foreign_chunks
 
-		while len(chunks) < config.num_foreign_chunks and timeout > 0:
+		while len(chunks) < Config.num_foreign_chunks and timeout > 0:
 			miner = self.pick_miner()
 			address = miner["address"] + "/get-chunk"
 			log.debug("Fetching chunk from {}".format(address))
@@ -175,10 +173,10 @@ class Miner():
 				log.warning(str(e))
 			
 			timeout -= 1
-			time.sleep(config.miner_wait)
+			time.sleep(Config.miner_wait)
 
-		if len(chunks) < config.num_foreign_chunks:
-			log.info("Chunks recieved: ({}/{}) ({})".format(len(chunks), config.num_foreign_chunks, self.chain_id[:8]))
+		if len(chunks) < Config.num_foreign_chunks:
+			log.info("Chunks recieved: ({}/{}) ({})".format(len(chunks), Config.num_foreign_chunks, self.chain_id[:8]))
 
 		return chunks
 
@@ -191,13 +189,13 @@ class Miner():
 	def publish_existence(self):
 		data_out = {}
 		data_out["branch_id"] = self.chain_id
-		data_out["branch_address"] = "http://{}:{}".format(config.exchange_ip, self.server_port)
+		data_out["branch_address"] = "http://{}:{}".format(Config.exchange_ip, self.server_port)
 		accepted = False
-		timeout = config.miner_exist_timout
+		timeout = Config.miner_exist_timout
 
 		while not accepted and timeout > 0:
 			try:
-				r = self.http.request('POST', config.miner_sub_addr,
+				r = self.http.request('POST', Config.miner_sub_addr,
 	                 headers={'Content-Type': 'application/json'},
 	                 body=json.dumps(data_out))
 
@@ -211,7 +209,7 @@ class Miner():
 				accepted = False
 			
 			timeout -= 1
-			time.sleep(config.miner_wait)
+			time.sleep(Config.miner_wait)
 
 		if not accepted:
 			log.warning("Exchange submission timeout for miner {}".format(self.chain_id[:8]))
@@ -219,11 +217,11 @@ class Miner():
 
 	def get_miners(self):
 		miners = []
-		timeout = config.retrieve_miners_timout
+		timeout = Config.retrieve_miners_timout
 
 		while len(miners) < 1 and timeout > 0:
 			try:
-				r = self.http.request('POST', config.get_miners_addr,
+				r = self.http.request('POST', Config.get_miners_addr,
 	                 headers={'Content-Type': 'application/json'},
 	                 body="{}")
 				
@@ -233,7 +231,7 @@ class Miner():
 				log.warning(str(e))
 			
 			timeout -= 1
-			time.sleep(config.miner_wait)
+			time.sleep(Config.miner_wait)
 
 		if len(miners) < 1:
 			log.warning("Could not get miners list from exchange")
