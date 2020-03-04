@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+import random
 from flask import Flask, request
 from utils.config import Config
 from miner.miner_log import MinerLog as Log
@@ -17,6 +18,7 @@ class Server():
         self.c_id = c_id
         self.port = port
         self.m_dir = m_dir
+
         # log.set_up(self.m_id, self.m_dir)
 
         global chain_id
@@ -41,24 +43,45 @@ class Server():
 
 
 
-def load_blockchain():
+def load_blockchain(die=8):
     fpath = os.path.join(Config.blockchain_dir, chain_id[:8], "blockchain.json")
-    with open(fpath) as f:
-        blockchain = f.read()
-    return json.loads(blockchain)
+    blockchain = []
+
+    try:
+        with open(fpath) as f:
+            blockchain = f.read()
+        blockchain = json.loads(blockchain)
+    except Exception as e:
+        if die > 0:
+            return load_blockchain(die=die-1)
+        else:
+            print("Time to die depleted")
+    
+    return blockchain
 
 
-def load_chunk():
+
+def load_chunk(die=8):
+    global plock
     fpath = os.path.join(Config.blockchain_dir, chain_id[:8], "chunks.json")
-    with open(fpath) as f:
-        chunks = json.loads(f.read())
+    chunk = {}
 
-    if len(chunks) == 0:
-        return None
+    try:
+        with open(fpath) as f:
+            chunks = json.loads(f.read())
 
-    chunk = chunks.pop(0)
-    with open(fpath, "w") as f:
-        f.write(json.dumps(chunks, indent=4))
+        if len(chunks) > 0:
+            chunk = chunks.pop(random.randint(0, len(chunks)))
+
+        with open(fpath, "w") as f:
+            f.write(json.dumps(chunks, indent=4))
+
+    except Exception as e:
+        if die > 0:
+            return load_chunk(die=die-1)
+        else:
+            print("Time to die depleted")
+
 
     return chunk
 

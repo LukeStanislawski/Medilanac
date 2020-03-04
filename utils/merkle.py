@@ -2,10 +2,13 @@ from utils import crypt
 
 
 def merkle_tree(data : [str]):
-	hashes = []
-	for d in data:
-		hashes.append(crypt.hash(d))
-	return merkle([hashes])
+	if data is None or len(data) < 1:
+		return []
+	else:
+		hashes = []
+		for d in data:
+			hashes.append(crypt.hash(d))
+		return merkle([hashes])
 
 
 def merkle(tree):

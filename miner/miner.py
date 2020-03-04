@@ -31,18 +31,22 @@ class Miner():
 		self.encoder = easyfec.Encoder(Config.ec_k, Config.ec_m)
 		self.decoder = easyfec.Decoder(Config.ec_k, Config.ec_m)
 
-		self.p_server = Process(target=Server, args=[self.id, self.chain_id, server_port, self.chain_dir])
+		self.p_server = Process(target=Server, args=[self.id, 
+			self.chain_id, 
+			server_port, 
+			self.chain_dir])
 
 
 		self.main()
-	
+
 		if terminate_server:
-			time.sleep(1000)
-			p.terminate()
+			time.sleep(2)
+			self.p_server.terminate()
+			Log.debug("Server terminated")
 
 
 	def main(self):
-		Log.info("Initialised. PubKey hash: {}..".format(self.id, self.chain_id[:8]))
+		Log.info("Initialised. PubKey hash: {}..".format(self.chain_id[:8]))
 
 		# Generate genesis block
 		genesis = self.gen_genesis()
@@ -69,13 +73,13 @@ class Miner():
 			else:
 				block = self.gen_new_block()
 
-			# Generate chunks and make available
-			chunks = self.get_chunks(block, block_id)
-			self.write_chunks(chunks)
-
 			# Update block with chunk data
 			block["foreign_chunks"] = self.get_foreign_chunks()
 			block = self.update_chunk_merkle(block)
+
+			# Generate chunks and make available
+			chunks = self.get_chunks(block, block_id)
+			self.write_chunks(chunks)
 
 			# Store and save block
 			self.blockchain.append(block)
@@ -139,6 +143,7 @@ class Miner():
 
 	def write_chunks(self, chunks):
 		Log.debug("Updating chunks in file")
+
 		with open(self.chain_dir + "/chunks.json") as f:
 			e_chunks = json.loads(f.read())
 		
@@ -171,21 +176,23 @@ class Miner():
 					chunks.append(response)
 					Log.debug("Chunk retrieved from {}".format(address))
 			
+			except JSONDecodeError as e:
+				Log.warning("Error when retrieving foreign chunk from miner {} at {}:".format(miner["id"][:8], miner["address"]))
+				Log.warning("Recieved: {}".format(r.data))
 			except Exception as e:
 				Log.warning("Error when retrieving foreign chunk from miner {} at {}:".format(miner["id"][:8], miner["address"]))
 				Log.warning(str(e))
-			
+
 			timeout -= 1
-			time.sleep(Config.miner_wait)
+			time.sleep(round(random.uniform(Config.miner_min_wait,Config.miner_max_wait), 3))
 
-		if len(chunks) < Config.num_foreign_chunks:
-			Log.info("Chunks received: ({}/{}) ({})".format(len(chunks), Config.num_foreign_chunks, self.chain_id[:8]))
-
-		return chunks
+		Log.info("Chunks found: ({}/{}) ({})".format(len(chunks), Config.num_foreign_chunks, self.chain_id[:8]))
+		return [x for x in chunks if x != {}]
 
 
 	def write_blockchain(self):
 		Log.debug("Writing blockchain")
+
 		with open(self.chain_dir + "/blockchain.json", 'w') as f:
 			f.write(json.dumps(self.blockchain, sort_keys=True, indent=4))
 
@@ -205,7 +212,7 @@ class Miner():
 	                 headers={'Content-Type': 'application/json'},
 	                 body=json.dumps(data_out))
 
-				Log.debug("Received response: {}".format(r.data))
+				Log.debug("Received response")
 				response = json.loads(r.data)
 				Log.debug("Parsed response JSON")
 				if response["status"] == "accepted":
@@ -217,7 +224,7 @@ class Miner():
 				accepted = False
 			
 			timeout -= 1
-			time.sleep(Config.miner_wait)
+			time.sleep(round(random.uniform(Config.miner_min_wait,Config.miner_max_wait), 3))
 
 		if not accepted:
 			Log.warning("Exchange submission timeout for miner {}".format(self.chain_id[:8]))
@@ -228,7 +235,7 @@ class Miner():
 		miners = []
 		timeout = Config.retrieve_miners_timout
 
-		while len(miners) < 1 and timeout > 0:
+		while (len(miners) < 1 or (len(miners) == 1 and miners[0]["id"] == self.chain_id)) and timeout > 0:
 			try:
 				Log.debug("Posting to {}".format(Config.get_miners_addr))
 				r = self.http.request('POST', Config.get_miners_addr,
@@ -244,11 +251,11 @@ class Miner():
 				Log.warning(str(e))
 			
 			timeout -= 1
-			time.sleep(Config.miner_wait)
+			time.sleep(round(random.uniform(Config.miner_min_wait,Config.miner_max_wait), 3))
 
 		Log.debug("Retrieved {} miners from exchange".format(len(miners)))
 		if (len(miners) < 1) or (len(miners) == 1 and miners[0]["id"] == self.chain_id):
-			Log.warning("Could not get miners list from exchange")
+			Log.warning("Could not get miners list from exchange with {} attempts".format(Config.retrieve_miners_timout - timeout))
 
 		return miners
 
@@ -263,7 +270,7 @@ class Miner():
 			miner = miners[random.randint(0, len(miners)-1)]
 			valid = self.validate_miner(miner)
 		
-		Log.debug("Chosed miner {} at {}".format(miner["id"], miner["address"]))
+		Log.debug("Chose miner {} at {}".format(miner["id"][:8], miner["address"]))
 		return miner
 
 
@@ -294,7 +301,7 @@ class Miner():
 			Log.debug("Parsed response JSON")
 
 		except Exception as e:
-			Log.warning("Error when retreiveing foreign chunks:")
+			Log.warning("Error when retrieving bc headders:")
 			Log.warning(str(e))
 		
 		return blockchain
@@ -314,5 +321,4 @@ class Miner():
 		hashes = [x["hash"] for x in block["foreign_chunks"]]
 		merkle = merkle_tree(hashes)
 		block["head"]["chunk_merkle"] = merkle[0:-1]
-		
 		return block

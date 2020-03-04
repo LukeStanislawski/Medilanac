@@ -7,12 +7,18 @@ from utils.config import Config
 
 
 def main(branch_id):
-	chunks = []
 	branch_paths = get_bpaths()
 	chunks = find_chunks(branch_id, branch_paths)
 	blocks = reconstruct_blocks(chunks)
 	print (json.dumps(blocks, indent=4))
 	write_chain(blocks)
+
+
+def reconstruct(branch_id):
+	branch_paths = get_bpaths()
+	chunks = find_chunks(branch_id, branch_paths)
+	blocks = reconstruct_blocks(chunks)
+	return blocks
 	
 
 def get_bpaths():
@@ -29,11 +35,11 @@ def find_chunks(branch_id, branch_paths):
 		with open(path) as f:
 			blockchain = json.loads(f.read())
 
-		for block in blockchain:
-			if "foreign_chunks" in block:
-				for chunk in block["foreign_chunks"]:
-					if chunk["head"]["chain_id"].startswith(branch_id):
-						chunks.append(chunk)
+			for block in blockchain:
+				if "foreign_chunks" in block:
+					for chunk in block["foreign_chunks"]:
+						if chunk["head"]["chain_id"].startswith(branch_id):
+							chunks.append(chunk)
 
 	return chunks
 
@@ -44,16 +50,21 @@ def reconstruct_blocks(chunks):
 
 	blocks = []
 	for b_id in b_ids_found:
-		b_chunks = [x for x in chunks if x["head"]["block_id"] == b_id]
-		print("Found {} chunks for block {}".format(len(b_chunks), b_id))
-		b_chunks = sorted(b_chunks, key = lambda x: x['head']["chunk_id"])
-		raw_chunks = [bytes(x["data"], 'utf-8') for x in b_chunks]
-		inds = [x["head"]["chunk_id"] for x in b_chunks]
+		try:
+			b_chunks = [x for x in chunks if x["head"]["block_id"] == b_id]
+			print("Found {} chunks for block {}".format(len(b_chunks), b_id))
+			b_chunks = sorted(b_chunks, key = lambda x: x['head']["chunk_id"])
+			raw_chunks = [bytes(x["data"], 'utf-8') for x in b_chunks]
+			inds = [x["head"]["chunk_id"] for x in b_chunks]
 
-		d = Decoder(Config.ec_k, Config.ec_m)
-		d_data = d.decode(raw_chunks[:Config.ec_k], inds[:Config.ec_k], 0)
-		d_data = d_data.decode('utf-8').rstrip('\x00')
-		blocks.append(json.loads(d_data))
+			d = Decoder(Config.ec_k, Config.ec_m)
+			d_data = d.decode(raw_chunks[:Config.ec_k], inds[:Config.ec_k], 0)
+			d_data = d_data.decode('utf-8').rstrip('\x00')
+			blocks.append(json.loads(d_data))
+		except Exception as e:
+			print("Error, could not reconstruct block {}:".format(b_id))
+			print(str(e))
+			blocks.append({})
 
 	return blocks
 

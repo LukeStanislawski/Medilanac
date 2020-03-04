@@ -15,10 +15,6 @@ def hash(digest):
         hex_dig = hash_object.hexdigest()
         return hex_dig
 
-def hash_block(block):
-    body = json.dumps(block['block'], sort_keys=True)
-    return hash(body)
-
 
 def gen_keys():
     new_key = RSA.generate(2048, e=65537)

@@ -1,4 +1,5 @@
 import json
+import logging
 from flask import Flask, request
 from utils.config import Config
 
@@ -7,8 +8,13 @@ branches = []
 
 
 class Exchange():
-    def __init__(self):
+    def __init__(self, display_http=False):
         global app
+
+        if not display_http:
+            log = logging.getLogger('werkzeug')
+            log.setLevel(logging.ERROR)
+
         app.run(debug=True, 
             host=Config.exchange_ip, 
             port=Config.exchange_port,
@@ -25,7 +31,7 @@ def submit_miner():
     branch["id"] = data["branch_id"]
     branch["address"] = data["branch_address"]
     branches.append(branch)
-    print ("Num miners: {}".format(len(branches)))
+    print ("Exchange: Num miners: {}".format(len(branches)))
     return '{"status":"accepted"}'
 
 
@@ -38,4 +44,4 @@ def get_miners():
 
  
 if __name__ == "__main__":
-	E = Exchange()
+	E = Exchange(display_http=False)

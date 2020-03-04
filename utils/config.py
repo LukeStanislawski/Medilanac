@@ -29,7 +29,7 @@ class Config():
 
 	# Exchange internal IP address
 	exchange_ip = "localhost"
-	exchange_port = 5000
+	exchange_port = 4999
 
 	# Index of chunk submittion and retrieval
 	exchange_submit_index = "/submit"
@@ -58,13 +58,19 @@ class Config():
 	miner_exist_timout = 3
 
 	# Number of attempts to submit miner existence to the server before timeout
-	retrieve_miners_timout = 5
+	retrieve_miners_timout = 8
 
-	#Wait time between attempts (seconds)
-	miner_wait = 0.25
+	#Min wait time between http request attempts (seconds)
+	miner_min_wait = 0.1
+
+	#Max wait time between http request attempts (seconds)
+	miner_max_wait = 0.3
+
+	# Wait time between requesting miners list from exchange
+	miner_exchange_wait = 0.5
 
 	# Number of attempts to retrieve foreign chunks from the server before timeout
-	foreign_chunk_timout = 3
+	foreign_chunk_timout = 6
 
 	# Max size of chunk to split block into
 	max_chunk_size = 100
@@ -73,7 +79,7 @@ class Config():
 	ec_k = 4
 
 	# Erasure code m value: total number of chunks to split data into
-	ec_m = 5
+	ec_m = 6
 
 	# Number of files/stings to add as data in each block
 	data_items_per_block = 4
