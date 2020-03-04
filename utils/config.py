@@ -12,7 +12,7 @@ class Config():
 	num_blocks = 5
 
 	# Number of foreign chunks added to each block
-	num_foreign_chunks = 8
+	num_foreign_chunks = 10
 
 	# Path to blockchain dir
 	blockchain_dir = os.path.join(

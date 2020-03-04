@@ -15,7 +15,7 @@ from miner.miner_server import Server
 
 
 class Miner():
-	def __init__(self, id, server_port, test=False):
+	def __init__(self, id, server_port, terminate_server=False):
 		self.id = id
 		self.server_port = server_port
 		self.blockchain = []
@@ -33,11 +33,12 @@ class Miner():
 
 		self.p_server = Process(target=Server, args=[self.id, self.chain_id, server_port, self.chain_dir])
 
-		if not test:
-			self.main()
-		
+
+		self.main()
+	
+		if terminate_server:
 			time.sleep(1000)
-			p.join()
+			p.terminate()
 
 
 	def main(self):
@@ -163,13 +164,15 @@ class Miner():
 	                 headers={'Content-Type': 'application/json'},
 	                 body="{}")
 				
+				Log.debug("Received response")
 				response = json.loads(r.data)
+				Log.debug("Parsed response JSON")
 				if "status" not in response:
 					chunks.append(response)
 					Log.debug("Chunk retrieved from {}".format(address))
 			
 			except Exception as e:
-				Log.warning("Error when retrieveing foreign chunk from miner {} at {}:".format(miner["id"][:8], miner["address"]))
+				Log.warning("Error when retrieving foreign chunk from miner {} at {}:".format(miner["id"][:8], miner["address"]))
 				Log.warning(str(e))
 			
 			timeout -= 1
@@ -202,7 +205,7 @@ class Miner():
 	                 headers={'Content-Type': 'application/json'},
 	                 body=json.dumps(data_out))
 
-				Log.debug("Recieved response")
+				Log.debug("Received response: {}".format(r.data))
 				response = json.loads(r.data)
 				Log.debug("Parsed response JSON")
 				if response["status"] == "accepted":
@@ -232,12 +235,12 @@ class Miner():
 	                 headers={'Content-Type': 'application/json'},
 	                 body="{}")
 				
-				Log.debug("Recieved response")
+				Log.debug("Received response: {}".format(r.data))
 				miners = json.loads(r.data)
 				Log.debug("Parsed response JSON")
 
 			except Exception as e:
-				Log.warning("Error when retrieveing foreign chunks:")
+				Log.warning("Error when retrieving foreign chunks:")
 				Log.warning(str(e))
 			
 			timeout -= 1
@@ -286,12 +289,12 @@ class Miner():
                  headers={'Content-Type': 'application/json'},
                  body="{}")
 			
-			Log.debug("Recieved response")
+			Log.debug("Received response: {}".format(r.data))
 			blockchain = json.loads(r.data)
 			Log.debug("Parsed response JSON")
 
 		except Exception as e:
-			Log.warning("Error when retrieveing foreign chunks:")
+			Log.warning("Error when retreiveing foreign chunks:")
 			Log.warning(str(e))
 		
 		return blockchain

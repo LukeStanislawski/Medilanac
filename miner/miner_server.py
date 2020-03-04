@@ -34,7 +34,10 @@ class Server():
     def run(self):
         global app
         
-        app.run(debug=False, host=Config.miner_server_ip, port=self.port)
+        app.run(debug=False, 
+            host=Config.miner_server_ip, 
+            port=self.port,
+            use_reloader=False)
 
 
 

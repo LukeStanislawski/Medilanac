@@ -6,6 +6,16 @@ app = Flask(__name__)
 branches = []
 
 
+class Exchange():
+    def __init__(self):
+        global app
+        app.run(debug=True, 
+            host=Config.exchange_ip, 
+            port=Config.exchange_port,
+            use_reloader=False)
+
+
+
 @app.route("/submit-miner", methods=['POST'])
 def submit_miner():
     # TODO: add validation
@@ -26,8 +36,6 @@ def get_miners():
     # data = json.loads(request.data)
     return json.dumps(branches)
 
-
-
  
 if __name__ == "__main__":
-	app.run(debug=True, host=Config.exchange_ip, port=Config.exchange_port)
+	E = Exchange()
