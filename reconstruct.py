@@ -14,10 +14,10 @@ def main(branch_id):
 	write_chain(blocks)
 
 
-def reconstruct(branch_id):
+def reconstruct(branch_id, buf=0):
 	branch_paths = get_bpaths()
 	chunks = find_chunks(branch_id, branch_paths)
-	blocks = reconstruct_blocks(chunks)
+	blocks = reconstruct_blocks(chunks, buf)
 	return blocks
 	
 
@@ -44,27 +44,28 @@ def find_chunks(branch_id, branch_paths):
 	return chunks
 
 
-def reconstruct_blocks(chunks):
+def reconstruct_blocks(chunks, buf=0):
 	b_ids_found = sorted(list(set([x["head"]["block_id"] for x in chunks])))
 	print ("Found chunks for blocks: {}".format(b_ids_found))
 
 	blocks = []
-	for b_id in b_ids_found:
-		try:
+	for b_id in b_ids_found[:(-1 * buf)]:
+		# try:
+		if True:
 			b_chunks = [x for x in chunks if x["head"]["block_id"] == b_id]
 			print("Found {} chunks for block {}".format(len(b_chunks), b_id))
 			b_chunks = sorted(b_chunks, key = lambda x: x['head']["chunk_id"])
-			raw_chunks = [bytes(x["data"], 'utf-8') for x in b_chunks]
+			raw_chunks = [bytes(x["data"], 'cp437') for x in b_chunks]
 			inds = [x["head"]["chunk_id"] for x in b_chunks]
 
 			d = Decoder(Config.ec_k, Config.ec_m)
 			d_data = d.decode(raw_chunks[:Config.ec_k], inds[:Config.ec_k], 0)
 			d_data = d_data.decode('utf-8').rstrip('\x00')
 			blocks.append(json.loads(d_data))
-		except Exception as e:
-			print("Error, could not reconstruct block {}:".format(b_id))
-			print(str(e))
-			blocks.append({})
+		# except Exception as e:
+		# 	print("Error, could not reconstruct block {}:".format(b_id))
+		# 	print(str(e))
+		# 	blocks.append({})
 
 	return blocks
 

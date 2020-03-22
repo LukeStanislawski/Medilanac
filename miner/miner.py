@@ -138,6 +138,10 @@ class Miner():
 			chunk["signature"] = crypt.sign(self.priv, chunk['hash'])
 			chunks.append(chunk)
 
+		sizes = [len(x["data"]) for x in chunks]
+		Log.debug("Chunk sizes: {}".format(sizes))
+		if min(sizes) != max(sizes):
+			print ("---------CHUNK SIZES UNEQUAL----------")
 		return chunks
 
 
