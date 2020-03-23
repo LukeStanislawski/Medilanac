@@ -4,23 +4,28 @@ from reconstruct import reconstruct
 from utils.config import Config
 import random
 import shutil
+import json
 
 
-def main():
+def test(subject_id, k=Config.ec_k, m=Config.ec_m):
+	
+	print("Subject: {}".format(subject_id))
 	res = {}
+	res["k"] = k
+	res["m"] = m
+	res["d_redundancy"] = float(m) / float(k)
+
 	bc_ids = os.listdir(Config.blockchain_dir)
 	bc_ids = [x for x in bc_ids if not x.startswith(".")]
+	bc_ids = [x for x in bc_ids if x != subject_id]
+	
 	res["num_miners"] = len(bc_ids)
-	failed = False
-
-	subject = random.randint(0, len(bc_ids) - 1)
-	subject = bc_ids.pop(subject)
-	res["subject"] = subject
+	res["subject"] = subject_id
 	res["num_alt_miners"] = len(bc_ids)
 	res["removed_branches"] = []
 	
-	print("Subject: {}".format(subject))
 
+	failed = False
 	while (not failed) and (len(bc_ids) > 1):
 		print(str(failed) + " - " + str(bc_ids))
 		rem_sub = random.randint(0, len(bc_ids) - 1)
@@ -29,7 +34,7 @@ def main():
 		res["removed_branches"].append(rem_sub)
 
 		try:
-			reconstruct(subject, buf=1)
+			reconstruct(subject_id, buf=2)
 			print("Successfully reconstructed branch")
 		except Exception as e:
 			print(str(e))
@@ -38,9 +43,10 @@ def main():
 
 
 	res["rem_when_fail"] = len(bc_ids)
-	print(res)
-
 	move_back()
+
+	print(res)
+	return res
 
 
 def mv(id):
@@ -56,6 +62,22 @@ def move_back():
 		dest = os.path.join(Config.blockchain_dir, id)
 		shutil.move(src, dest)
 
+
+def main():
+	results = []
+	bcs = os.listdir(Config.blockchain_dir)
+	bcs = [x for x in bcs if not x.startswith(".")][:20]
+
+	for bc in bcs:
+		results.append(test(bc))
+
+	frs = [x["rem_when_fail"] for x in results]
+	avg_fr = sum(frs) / float(len(frs))
+	print("Avg rem when fail: {}".format(avg_fr))
+
+	with open(Config.ft_res_file, "a") as f:
+		for r in results:
+			f.write(json.dumps(r) + "\n")
 
 
 if __name__ == "__main__":

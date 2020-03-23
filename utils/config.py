@@ -6,13 +6,19 @@ class Config():
 	# ----
 
 	# Number of miners to create
-	num_miners = 5
+	num_miners = 50
 
 	# Number of blocks each miner should generate (excluding genesis)
-	num_blocks = 5
+	num_blocks = 6
 
 	# Number of foreign chunks added to each block
-	num_foreign_chunks = 10
+	num_foreign_chunks = 11
+
+	# Erasure code k value: min number of chunk required to be able to reconstruct data
+	ec_k = 9
+
+	# Erasure code m value: total number of chunks to split data into
+	ec_m = 10
 
 	# Path to blockchain dir
 	blockchain_dir = os.path.join(
@@ -75,12 +81,6 @@ class Config():
 	# Max size of chunk to split block into
 	max_chunk_size = 100
 
-	# Erasure code k value: min number of chunk required to be able to reconstruct data
-	ec_k = 4
-
-	# Erasure code m value: total number of chunks to split data into
-	ec_m = 6
-
 	# Number of files/stings to add as data in each block
 	data_items_per_block = 4
 
@@ -94,9 +94,14 @@ class Config():
 	display_http = False
 
 
+	# Test
+	# ----
 
-	# Validation 
-	# ----------
+	ft_res_file = os.path.join(test_data_dir, "ft_results.csv")
+
+
+	# Config Validation 
+	# -----------------
 
 	# Number of files to validate from each block
 	fpb = 1
@@ -111,6 +116,9 @@ class Config():
 
 		if Config.fpb > Config.data_items_per_block:
 			errors.append("fpb cannot be greater data_items_per_block")
+
+		if Config.ec_k > Config.ec_m:
+			errors.append("k value must be less than m value for erasure coding")
 
 
 		if len(warnings) > 0:

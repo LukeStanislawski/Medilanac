@@ -54,7 +54,7 @@ def load_blockchain(ttl=5):
         blockchain = json.loads(blockchain)
     except JSONDecodeError as e:
         if ttl > 0:
-            blockchain = load_blockchain(die=die-1)
+            blockchain = load_blockchain(ttl=ttl-1)
         else:
             blockchain = []
     
