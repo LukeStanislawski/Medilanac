@@ -15,7 +15,7 @@ class Exchange():
             log = logging.getLogger('werkzeug')
             log.setLevel(logging.ERROR)
 
-        app.run(debug=True, 
+        app.run(debug=False, 
             host=Config.exchange_ip, 
             port=Config.exchange_port,
             use_reloader=False)

@@ -53,9 +53,13 @@ def test_e2e():
         with open(os.path.join(Config.blockchain_dir, chain, "blockchain.json")) as f:
             bc_o = json.loads(f.read())
         print("Reconstructing chain on {}".format(chain))
-        r_bc = reconstruct(chain)
+        r_bc = reconstruct(chain, buf=1)
 
-        bc = bc_o[:-1 * end_thresh]
+        if end_thresh != 0:
+            bc = bc_o[:-1 * end_thresh]
+        else:
+            bc = bc_o
+            
         print([x["head"]["id"] if "head" in x else -1 for x in bc_o])
         assert len(r_bc) >= len(bc), "Chunks for some blocks could not be found (even ignoring the last {} block(s): rbc={}, bc={}".format(end_thresh, [x["head"]["id"] if "head" in x else -1 for x in r_bc], [x["head"]["id"] if "head" in x else -1 for x in bc_o])
         r_bc = r_bc[:len(bc)]
