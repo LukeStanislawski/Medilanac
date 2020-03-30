@@ -6,19 +6,19 @@ class Config():
 	# ----
 
 	# Number of miners to create
-	num_miners = 50
+	num_miners = 5
 
 	# Number of blocks each miner should generate (excluding genesis)
-	num_blocks = 6
+	num_blocks = 8
 
 	# Number of foreign chunks added to each block
-	num_foreign_chunks = 11
+	num_foreign_chunks = 7
 
 	# Erasure code k value: min number of chunk required to be able to reconstruct data
-	ec_k = 9
+	ec_k = 3
 
 	# Erasure code m value: total number of chunks to split data into
-	ec_m = 10
+	ec_m = 5
 
 	# Path to blockchain dir
 	blockchain_dir = os.path.join(
@@ -65,6 +65,9 @@ class Config():
 
 	# Number of attempts to submit miner existence to the server before timeout
 	retrieve_miners_timout = 8
+
+	# Number of attempts to retrieve blockchain headers before timeout
+	retrieve_headers_timout = 5
 
 	#Min wait time between http request attempts (seconds)
 	miner_min_wait = 0.1

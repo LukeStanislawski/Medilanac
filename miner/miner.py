@@ -4,7 +4,7 @@ import time
 import json
 import urllib3
 from zfec import easyfec
-from multiprocessing import Process
+from multiprocessing import Process, Lock
 from utils import crypt
 from utils.config import Config
 from utils.data_generator import gen_sample_data
@@ -12,6 +12,8 @@ from utils.merkle import merkle_tree
 from utils.validator import validate_headders
 from miner.miner_log import MinerLog as Log
 from miner.miner_server import Server
+
+from json.decoder import JSONDecodeError
 
 
 class Miner():
@@ -31,10 +33,12 @@ class Miner():
 		self.encoder = easyfec.Encoder(Config.ec_k, Config.ec_m)
 		self.decoder = easyfec.Decoder(Config.ec_k, Config.ec_m)
 
+		self.lock = Lock()
 		self.p_server = Process(target=Server, args=[self.id, 
 			self.chain_id, 
 			server_port, 
-			self.chain_dir])
+			self.chain_dir,
+			self.lock])
 
 
 		self.main()
@@ -115,15 +119,19 @@ class Miner():
 		block["body"] = gen_sample_data(num_items=Config.data_items_per_block, rand_str=True, size=6)
 		block["head"]["file_merkle"] = merkle_tree(block["body"])
 		block["head"]["chunk_merkle"] = [] # Updated later
-		block["head"]["signature"] = ""
 		
 		return block
 
 
 	def get_chunks(self, block, block_id):
 		Log.debug("Generating chunks from block {}".format(block_id))
+
+		block_prim = {}
+		for key in ["head", "body"]:
+			block_prim[key] = block[key]
+
 		chunks = []
-		data = json.dumps(block, sort_keys=True).encode('utf-8')
+		data = json.dumps(block_prim, sort_keys=True).encode('utf-8')
 		c_datas = self.encoder.encode(data)
 		c_datas = [x.decode('cp437') for x in c_datas]
 
@@ -147,6 +155,7 @@ class Miner():
 
 	def write_chunks(self, chunks):
 		Log.debug("Updating chunks in file")
+		self.lock_acquire()
 
 		with open(self.chain_dir + "/chunks.json") as f:
 			e_chunks = json.loads(f.read())
@@ -155,6 +164,8 @@ class Miner():
 		
 		with open(self.chain_dir + "/chunks.json", 'w') as f:
 			f.write(json.dumps(e_chunks, indent=4))
+
+		self.lock_release()
 
 
 	def get_foreign_chunks(self):
@@ -169,9 +180,10 @@ class Miner():
 
 			try:
 				Log.debug("Posting to {}".format(address))
-				r = self.http.request('POST', address,
+				self.http = urllib3.PoolManager()
+				r = self.http.request('GET', address,
 	                 headers={'Content-Type': 'application/json'},
-	                 body="{}")
+	                 body="{}", timeout=2.0)
 				
 				Log.debug("Received response")
 				response = json.loads(r.data)
@@ -212,9 +224,10 @@ class Miner():
 		while not accepted and timeout > 0:
 			try:
 				Log.debug("Posting to {}".format(Config.miner_sub_addr))
+				self.http = urllib3.PoolManager()
 				r = self.http.request('POST', Config.miner_sub_addr,
 	                 headers={'Content-Type': 'application/json'},
-	                 body=json.dumps(data_out))
+	                 body=json.dumps(data_out), timeout=2.0)
 
 				Log.debug("Received response")
 				response = json.loads(r.data)
@@ -242,9 +255,10 @@ class Miner():
 		while (len(miners) < 1 or (len(miners) == 1 and miners[0]["id"] == self.chain_id)) and timeout > 0:
 			try:
 				Log.debug("Posting to {}".format(Config.get_miners_addr))
+				self.http = urllib3.PoolManager()
 				r = self.http.request('POST', Config.get_miners_addr,
 	                 headers={'Content-Type': 'application/json'},
-	                 body="{}")
+	                 body="{}", timeout=2.0)
 				
 				Log.debug("Received response: {}".format(r.data))
 				miners = json.loads(r.data)
@@ -280,7 +294,12 @@ class Miner():
 
 	def validate_miner(self, miner):
 		Log.debug("Validating miner {}".format(miner["id"]))
+
+		# TEMP
+		# return True
+		
 		blockchain = self.fetch_headders(miner["address"])
+		Log.debug("Validating blockchain")
 		es = validate_headders(blockchain)
 		
 		if len(es) > 0:
@@ -293,29 +312,39 @@ class Miner():
 
 	def fetch_headders(self, addr):
 		Log.debug("Fetching headers from {}".format(addr))
-		blockchain = None
-		try:
-			Log.debug("Posting to {}".format(addr + "/blockchain-headders"))
-			r = self.http.request('POST', addr + "/blockchain-headders",
-                 headers={'Content-Type': 'application/json'},
-                 body="{}")
-			
-			Log.debug("Received response: {}".format(r.data))
-			blockchain = json.loads(r.data)
-			Log.debug("Parsed response JSON")
+		blockchain = []
+		timeout = Config.retrieve_headers_timout
 
-		except Exception as e:
-			Log.warning("Error when retrieving bc headders:")
-			Log.warning(str(e))
+		while len(blockchain) == 0 and timeout > 0:
+			try:
+				Log.debug("Posting to {}".format(addr + "/blockchain-headders"))
+				self.http = urllib3.PoolManager()
+				r = self.http.request('POST', addr + "/blockchain-headders",
+	                 headers={'Content-Type': 'application/json'},
+	                 body="{}", timeout=2.0)
+				
+				Log.debug("Received response: {}".format(r.data))
+				blockchain = json.loads(r.data)
+				Log.debug("Parsed response JSON")
+
+			except Exception as e:
+				Log.warning("Error when retrieving bc headders:")
+				Log.warning(str(e))
+				timeout = timeout - 1
 		
 		return blockchain
 
 
 	def load_local_chunks(self):
 		Log.debug("Loading local chunks from file")
+		self.lock_acquire()
 
 		with open(os.path.join(self.chain_dir, "chunks.json")) as f:
 			chunks = json.loads(f.read())
+		Log.debug("Loaded {} chunks from file".format(len(chunks)))
+
+		self.lock_release()
+		Log.debug("Lock released")
 		
 		return chunks
 
@@ -326,3 +355,15 @@ class Miner():
 		merkle = merkle_tree(hashes)
 		block["head"]["chunk_merkle"] = merkle[0:-1]
 		return block
+
+
+	def lock_acquire(self):
+		Log.debug("Miner acquiring lock..")
+		self.lock.acquire()
+		Log.debug("Miner successfully acquired lock")
+
+
+	def lock_release(self):
+		Log.debug("Miner releasing lock..")
+		self.lock.release()
+		Log.debug("Miner successfully released lock")

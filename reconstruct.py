@@ -6,15 +6,17 @@ from utils.config import Config
 
 
 
-def main(branch_id):
+def main(branch_id, buf=0):
 	branch_paths = get_bpaths()
 	chunks = find_chunks(branch_id, branch_paths)
-	blocks = reconstruct_blocks(chunks)
+	blocks = reconstruct_blocks(chunks, buf)
+	print("Reconstructed blockchain:")
 	print (json.dumps(blocks, indent=4))
 	write_chain(blocks)
 
 
 def reconstruct(branch_id, buf=0):
+	print(Config.blockchain_dir)
 	branch_paths = get_bpaths()
 	chunks = find_chunks(branch_id, branch_paths)
 	blocks = reconstruct_blocks(chunks, buf)
@@ -49,7 +51,11 @@ def reconstruct_blocks(chunks, buf=0):
 	print ("Found chunks for blocks: {}".format(b_ids_found))
 
 	blocks = []
-	for b_id in b_ids_found[:(-1 * buf)]:
+	if buf != 0:
+		b_ids_found = b_ids_found[:(-1 * buf)]
+	print("Testing: {}".format(b_ids_found))
+	for b_id in b_ids_found:
+		print(" BLock id: {}".format(b_id))
 		# try:
 		if True:
 
@@ -78,14 +84,22 @@ def reconstruct_blocks(chunks, buf=0):
 
 
 def write_chain(blocks):
-	chain_id = blocks[-1]["head"]["chain_id"]
-	chain_dir = os.path.join(Config.blockchain_dir, chain_id[:8])
-	os.makedirs(chain_dir)
-	with open(chain_dir + "/blockchain.json", 'w') as f:
-		f.write(json.dumps(blocks, sort_keys=True, indent=4))
-
+	if len(blocks) > 0:
+		chain_id = blocks[-1]["head"]["chain_id"]
+		chain_dir = os.path.join(Config.blockchain_dir, chain_id[:8])
+		os.makedirs(chain_dir)
+		with open(chain_dir + "/blockchain.json", 'w') as f:
+			f.write(json.dumps(blocks, sort_keys=True, indent=4))
+	else:
+		print("Error: Could not write blockchain to file as blockchain is empty")
 
 
 if __name__ == "__main__":
 	chain_id = sys.argv[1]
-	main(chain_id)
+
+	if len(sys.argv) > 2:
+		buf = int(sys.argv[2])
+	else:
+		buf = 0
+
+	main(chain_id, buf=buf)

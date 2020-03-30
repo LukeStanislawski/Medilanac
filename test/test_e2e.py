@@ -14,8 +14,10 @@ from reconstruct import reconstruct
 def test_e2e():
     end_thresh = 2
     Config.num_miners = 5
-    Config.num_blocks = 5
-    Config.num_foreign_chunks = 10
+    Config.num_blocks = 8
+    Config.num_foreign_chunks = 7
+    Config.ec_k = 3
+    Config.ec_m = 5
     Config.blockchain_dir = os.path.abspath(os.path.join(Config.test_data_dir, "blockchain"))
     
     empty_dir()
@@ -46,15 +48,16 @@ def test_e2e():
 
     # Check each blockchain can be reconstructed
     # from the other blockchains 
-    # (excluding the lasy blocks)
+    # (excluding the last blocks)
     for chain in os.listdir(Config.blockchain_dir):
         with open(os.path.join(Config.blockchain_dir, chain, "blockchain.json")) as f:
-            bc = json.loads(f.read())
+            bc_o = json.loads(f.read())
         print("Reconstructing chain on {}".format(chain))
         r_bc = reconstruct(chain)
 
-        bc = bc[:-1 * end_thresh]
-        assert len(r_bc) >= len(bc), "Chunks for some blocks could not be found (even ignoring the last {} block(s)".format(end_thresh)
+        bc = bc_o[:-1 * end_thresh]
+        print([x["head"]["id"] if "head" in x else -1 for x in bc_o])
+        assert len(r_bc) >= len(bc), "Chunks for some blocks could not be found (even ignoring the last {} block(s): rbc={}, bc={}".format(end_thresh, [x["head"]["id"] if "head" in x else -1 for x in r_bc], [x["head"]["id"] if "head" in x else -1 for x in bc_o])
         r_bc = r_bc[:len(bc)]
     
         for b, r_b in zip(bc, r_bc):

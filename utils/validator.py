@@ -18,9 +18,12 @@ def validate_blockchain(blockchain):
 def validate_headders(blockchain):
 	es = []
 
-	es.extend(v_prev_head_hash(blockchain))
-	es.extend(v_single_chainid(blockchain))
-	es.extend(v_merkle_trees(blockchain))
+	try:
+		es.extend(v_prev_head_hash(blockchain))
+		es.extend(v_single_chainid(blockchain))
+		es.extend(v_merkle_trees(blockchain))
+	except Exception as e:
+		es = [str(e)]
 
 	return es
 

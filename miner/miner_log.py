@@ -1,5 +1,6 @@
 import sys, os
 from datetime import datetime
+import threading
 
 class MinerLog():
 	id = None
@@ -15,7 +16,7 @@ class MinerLog():
 	def set_up(id, dir):
 		MinerLog.id = id
 		MinerLog.dir = dir
-		MinerLog.log_file = os.path.join(MinerLog.dir, "log.txt")
+		MinerLog.log_file = os.path.join(MinerLog.dir, "log.miner.txt")
 
 
 	def warning(msg):
@@ -50,3 +51,5 @@ class MinerLog():
 				f.write(msg)
 		else:
 			print("WARNING: Log not saved, log must be setup first")
+
+

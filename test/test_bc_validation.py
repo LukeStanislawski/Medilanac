@@ -15,8 +15,8 @@ def test_bc_headers_valid():
 def test_bc_headers_invalid():
 	for i in range(2):
 		fpath = os.path.join(Config.test_data_dir, "bc_headders_iv_{}.json".format(i))
-	with open(fpath) as f:
-		bc = json.loads(f.read())
-	assert len(validate_headders(bc)) > 0, "test failed"
+		with open(fpath) as f:
+			bc = json.loads(f.read())
+		assert len(validate_headders(bc)) > 0, "test failed"
 
 # test_bc_headers()
