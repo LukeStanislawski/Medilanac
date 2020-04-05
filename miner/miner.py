@@ -297,9 +297,6 @@ class Miner():
 
 	def validate_miner(self, miner):
 		Log.debug("Validating miner {}".format(miner["id"]))
-
-		# TEMP
-		# return True
 		
 		blockchain = self.fetch_headers(miner["address"])
 		Log.debug("Validating blockchain")

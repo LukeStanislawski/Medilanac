@@ -70,6 +70,15 @@ def hash_chunk(chunk, attrs=["head", "data"]):
         raw_chunk[attr] = chunk[attr]
 
     return hash(json.dumps(raw_chunk, sort_keys=True))
+
+
+def hash_filedata(filedata, attrs=["data", "filename", "filesize", "patient_id", "patient_pub_key"]):
+    raw_filedata = {}
+    for attr in attrs:
+        if attr in filedata:
+            raw_filedata[attr] = filedata[attr]
+
+    return hash(json.dumps(raw_filedata, sort_keys=True))
     
 
 def get_rand_str(size=64, chars=string.ascii_uppercase + string.ascii_lowercase + string.digits):

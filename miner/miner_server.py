@@ -8,6 +8,7 @@ from miner.miner_server_log import MinerServerLog as Log
 from json.decoder import JSONDecodeError
 import threading
 from threading import Lock
+from utils.crypt import hash_filedata
 
 
 
@@ -139,7 +140,7 @@ def get_tids():
 
 @app.route("/block", methods=['POST'])
 def get_blockchain():
-    Log.debug("Recieved request: /block, threads: {}".format(get_tids()))
+    Log.debug("Received request: /block, threads: {}".format(get_tids()))
     global chain_id
     data = json.loads(request.data)
     log.debug("Parsed json request data")
@@ -150,7 +151,7 @@ def get_blockchain():
 
 @app.route("/blockchain-headers", methods=['POST'])
 def get_blockchain_headers():
-    Log.debug("Recieved request: /blockchain-headers, threads: {}".format(get_tids()))
+    Log.debug("Received request: /blockchain-headers, threads: {}".format(get_tids()))
     global chain_id
     # data = json.loads(request.data)
     blockchain = load_blockchain()
@@ -165,7 +166,7 @@ def get_blockchain_headers():
 
 @app.route("/get-chunk", methods=['GET'])
 def get_chunks():
-    Log.debug("Recieved request: /get-chunk, threads: {}".format(get_tids()))
+    Log.debug("Received request: /get-chunk, threads: {}".format(get_tids()))
     global chain_id
     # data = json.loads(request.data)
     chunk = load_chunk()
@@ -178,3 +179,22 @@ def get_chunks():
         return json.dumps(chunk)
 
     
+@app.route("/validate", methods=['POST'])
+def validate():
+    Log.debug("Received request: /validate, threads: {}".format(get_tids()))
+    global chain_id
+    Log.debug(request.data)
+    data = json.loads(request.data)
+    blockchain = load_blockchain()
+
+    if data["tree_type"] == "FILE":
+        for block in blockchain:
+            if type(block["body"]) is list:
+                for d in block["body"]:
+                    if hash_filedata(d) == data["hash"]:
+                        Log.debug("Found file with hash {}, threads: {}".format(data["hash"][:8], get_tids()))
+                        return json.dumps(d, sort_keys=True)
+
+
+    Log.debug("Could not find file with hash {}, threads: {}".format(data["hash"][:8], get_tids()))
+    return "ERROR"
