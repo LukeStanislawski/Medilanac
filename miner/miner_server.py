@@ -53,7 +53,7 @@ class Server():
 
 
 
-def load_blockchain(ttl=5):
+def load_blockchain(ttl=8):
     Log.debug("Loading blockchain")
     global plock
     fpath = os.path.join(Config.blockchain_dir, chain_id[:8], "blockchain.json")
@@ -81,13 +81,13 @@ def load_blockchain(ttl=5):
         if ttl > 0:
             blockchain = load_blockchain(ttl=ttl-1)
         else:
-            Log.Debug("TTL expired, returning empty blockchain")
+            Log.debug("TTL expired, returning empty blockchain")
 
     return blockchain
 
 
 
-def load_chunk(ttl=5):
+def load_chunk(ttl=8):
     Log.debug("Loading chunk")
     global plock
     fpath = os.path.join(Config.blockchain_dir, chain_id[:8], "chunks.json")

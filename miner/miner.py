@@ -12,6 +12,7 @@ from utils.merkle import merkle_tree
 from utils.validator import validate_headers
 from miner.miner_log import MinerLog as Log
 from miner.miner_server import Server
+from patient.patient import Patient
 
 from json.decoder import JSONDecodeError
 
@@ -32,6 +33,8 @@ class Miner():
 		self.http = urllib3.PoolManager()
 		self.encoder = easyfec.Encoder(Config.ec_k, Config.ec_m)
 		self.decoder = easyfec.Decoder(Config.ec_k, Config.ec_m)
+
+		self.patients = [Patient() for x in range(Config.patients_per_miner)]
 
 		self.lock = Lock()
 		self.p_server = Process(target=Server, args=[self.id, 
@@ -116,7 +119,7 @@ class Miner():
 		block["head"]["chain_id"] = self.chain_id
 		block["head"]["pub_key"] = self.pub.hex()
 		block["head"]["id"] = len(self.blockchain)
-		block["body"] = gen_sample_data(num_items=Config.data_items_per_block, rand_str=True, size=6)
+		block["body"] = [x.get_data() for x in self.patients]
 		block["head"]["file_merkle"] = merkle_tree(block["body"])
 		block["head"]["chunk_merkle"] = [] # Updated later
 		
