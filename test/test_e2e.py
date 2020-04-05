@@ -12,20 +12,12 @@ from reconstruct import reconstruct
 
 
 def test_e2e():
+    initialise()
     end_thresh = 2
-    Config.num_miners = 5
-    Config.num_blocks = 8
-    Config.num_foreign_chunks = 7
-    Config.ec_k = 3
-    Config.ec_m = 5
-    Config.blockchain_dir = os.path.abspath(os.path.join(Config.test_data_dir, "blockchain"))
-    
-    empty_dir()
 
     # Start exchange server
     p_ex = Process(target=Exchange)
     p_ex.start()
-
     print("Giving server time to start up")
     time.sleep(1.5)
     print("Ready or not here I come")
@@ -52,6 +44,7 @@ def test_e2e():
     for chain in os.listdir(Config.blockchain_dir):
         with open(os.path.join(Config.blockchain_dir, chain, "blockchain.json")) as f:
             bc_o = json.loads(f.read())
+        
         print("Reconstructing chain on {}".format(chain))
         r_bc = reconstruct(chain, buf=1)
 
@@ -69,6 +62,16 @@ def test_e2e():
             hash_r_b = hash_block(r_b, attrs=["head", "body"])
             assert hash_b == hash_r_b, "Hash of reconstructed block {} on chain {}.. does not match original".format(i, chain)
 
+
+def initialise():
+    Config.num_miners = 5
+    Config.num_blocks = 8
+    Config.num_foreign_chunks = 7
+    Config.ec_k = 3
+    Config.ec_m = 5
+    Config.blockchain_dir = os.path.abspath(os.path.join(Config.test_data_dir, "blockchain"))
+    
+    empty_dir()
 
 
 def empty_dir():

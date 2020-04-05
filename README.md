@@ -93,6 +93,12 @@ The tests can be run using pytest with the following command:
 py.test
 ```
 
+To run an end-to-end test of the system, enter the following command:
+
+```
+py.test test/test_e2e.py
+```
+
 ## Dependencies
 
 The following dependencies are required to run the software and can be installed by following the installation instructions:
