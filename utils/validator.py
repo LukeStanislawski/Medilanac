@@ -15,7 +15,7 @@ def validate_blockchain(blockchain):
 	return es
 
 
-def validate_headders(blockchain):
+def validate_headers(blockchain):
 	es = []
 
 	try:
@@ -102,6 +102,6 @@ if __name__ == "__main__":
 	for x in validate_blockchain(blockchain):
 		print("    {}".format(x))
 	
-	print("Headders only:")
-	for x in validate_headders(blockchain):
+	print("Headers only:")
+	for x in validate_headers(blockchain):
 		print("    {}".format(x))

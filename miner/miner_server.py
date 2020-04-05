@@ -148,9 +148,9 @@ def get_blockchain():
     return blockchain[int(data["block_id"])]
 
 
-@app.route("/blockchain-headders", methods=['POST'])
-def get_blockchain_headders():
-    Log.debug("Recieved request: /blockchain-headders, threads: {}".format(get_tids()))
+@app.route("/blockchain-headers", methods=['POST'])
+def get_blockchain_headers():
+    Log.debug("Recieved request: /blockchain-headers, threads: {}".format(get_tids()))
     global chain_id
     # data = json.loads(request.data)
     blockchain = load_blockchain()

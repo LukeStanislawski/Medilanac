@@ -9,7 +9,7 @@ from utils import crypt
 from utils.config import Config
 from utils.data_generator import gen_sample_data
 from utils.merkle import merkle_tree
-from utils.validator import validate_headders
+from utils.validator import validate_headers
 from miner.miner_log import MinerLog as Log
 from miner.miner_server import Server
 
@@ -298,9 +298,9 @@ class Miner():
 		# TEMP
 		# return True
 		
-		blockchain = self.fetch_headders(miner["address"])
+		blockchain = self.fetch_headers(miner["address"])
 		Log.debug("Validating blockchain")
-		es = validate_headders(blockchain)
+		es = validate_headers(blockchain)
 		
 		if len(es) > 0:
 			Log.debug("Blockchain INVALID:{}".format("\n    ".join(es)))
@@ -310,16 +310,16 @@ class Miner():
 			return True
 
 
-	def fetch_headders(self, addr):
+	def fetch_headers(self, addr):
 		Log.debug("Fetching headers from {}".format(addr))
 		blockchain = []
 		timeout = Config.retrieve_headers_timout
 
 		while len(blockchain) == 0 and timeout > 0:
 			try:
-				Log.debug("Posting to {}".format(addr + "/blockchain-headders"))
+				Log.debug("Posting to {}".format(addr + "/blockchain-headers"))
 				self.http = urllib3.PoolManager()
-				r = self.http.request('POST', addr + "/blockchain-headders",
+				r = self.http.request('POST', addr + "/blockchain-headers",
 	                 headers={'Content-Type': 'application/json'},
 	                 body="{}", timeout=2.0)
 				
@@ -328,7 +328,7 @@ class Miner():
 				Log.debug("Parsed response JSON")
 
 			except Exception as e:
-				Log.warning("Error when retrieving bc headders:")
+				Log.warning("Error when retrieving bc headers:")
 				Log.warning(str(e))
 				timeout = timeout - 1
 		
