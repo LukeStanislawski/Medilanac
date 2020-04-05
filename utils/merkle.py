@@ -5,9 +5,16 @@ def merkle_tree(data : [str]):
 	if data is None or len(data) < 1:
 		return []
 	else:
+		return merkle([data])
+
+
+def merkle_tree_files(data : [str]):
+	if data is None or len(data) < 1:
+		return []
+	else:
 		hashes = []
 		for d in data:
-			hashes.append(crypt.hash(d))
+			hashes.append(d["hash"])
 		return merkle([hashes])
 
 

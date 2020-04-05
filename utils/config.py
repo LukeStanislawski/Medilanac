@@ -69,6 +69,9 @@ class Config():
 	# Number of attempts to retrieve blockchain headers before timeout
 	retrieve_headers_timout = 5
 
+	# Number of attempts to query validity of miner
+	query_validity_timeout = 5
+
 	#Min wait time between http request attempts (seconds)
 	miner_min_wait = 0.1
 

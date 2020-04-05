@@ -8,10 +8,11 @@ from multiprocessing import Process, Lock
 from utils import crypt
 from utils.config import Config
 from utils.data_generator import gen_sample_data
-from utils.merkle import merkle_tree
+from utils.merkle import merkle_tree_files, merkle_tree
 from utils.validator import validate_headers
 from miner.miner_log import MinerLog as Log
 from miner.miner_server import Server
+from miner.miner_validator import MinerValidator
 from patient.patient import Patient
 
 from json.decoder import JSONDecodeError
@@ -35,6 +36,7 @@ class Miner():
 		self.decoder = easyfec.Decoder(Config.ec_k, Config.ec_m)
 
 		self.patients = [Patient() for x in range(Config.patients_per_miner)]
+		self.MinerValidator = MinerValidator()
 
 		self.lock = Lock()
 		self.p_server = Process(target=Server, args=[self.id, 
@@ -120,7 +122,7 @@ class Miner():
 		block["head"]["pub_key"] = self.pub.hex()
 		block["head"]["id"] = len(self.blockchain)
 		block["body"] = [x.get_data() for x in self.patients]
-		block["head"]["file_merkle"] = merkle_tree(block["body"])
+		block["head"]["file_merkle"] = merkle_tree_files(block["body"])
 		block["head"]["chunk_merkle"] = [] # Updated later
 		
 		return block
@@ -289,50 +291,10 @@ class Miner():
 			miners = self.get_miners()
 			miners = [x for x in miners if x["id"] != self.chain_id]
 			miner = miners[random.randint(0, len(miners)-1)]
-			valid = self.validate_miner(miner)
+			valid = self.MinerValidator.validate(miner)
 		
 		Log.debug("Chose miner {} at {}".format(miner["id"][:8], miner["address"]))
 		return miner
-
-
-	def validate_miner(self, miner):
-		Log.debug("Validating miner {}".format(miner["id"]))
-		
-		blockchain = self.fetch_headers(miner["address"])
-		Log.debug("Validating blockchain")
-		es = validate_headers(blockchain)
-		
-		if len(es) > 0:
-			Log.debug("Blockchain INVALID:{}".format("\n    ".join(es)))
-			return False
-		else:
-			Log.debug("Blockchain VALID")
-			return True
-
-
-	def fetch_headers(self, addr):
-		Log.debug("Fetching headers from {}".format(addr))
-		blockchain = []
-		timeout = Config.retrieve_headers_timout
-
-		while len(blockchain) == 0 and timeout > 0:
-			try:
-				Log.debug("Posting to {}".format(addr + "/blockchain-headers"))
-				self.http = urllib3.PoolManager()
-				r = self.http.request('POST', addr + "/blockchain-headers",
-	                 headers={'Content-Type': 'application/json'},
-	                 body="{}", timeout=2.0)
-				
-				Log.debug("Received response: {}".format(r.data))
-				blockchain = json.loads(r.data)
-				Log.debug("Parsed response JSON")
-
-			except Exception as e:
-				Log.warning("Error when retrieving bc headers:")
-				Log.warning(str(e))
-				timeout = timeout - 1
-		
-		return blockchain
 
 
 	def load_local_chunks(self):
