@@ -66,14 +66,16 @@ def move_back():
 def main():
 	results = []
 	bcs = os.listdir(Config.blockchain_dir)
-	bcs = [x for x in bcs if not x.startswith(".")][:20]
+	bcs = [x for x in bcs if not x.startswith(".")]
+	while len(bcs) > 20:
+		bcs.pop(random.randint(0, len(bcs)-1))
 
 	for bc in bcs:
 		results.append(test(bc))
 
 	frs = [x["rem_when_fail"] for x in results]
 	avg_fr = sum(frs) / float(len(frs))
-	print("Avg rem when fail: {}".format(avg_fr))
+	print("Avg remaining when fail: {}".format(avg_fr))
 
 	with open(Config.ft_res_file, "a") as f:
 		for r in results:
