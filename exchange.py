@@ -42,6 +42,14 @@ def get_miners():
     # data = json.loads(request.data)
     return json.dumps(branches)
 
+
+@app.route("/reset", methods=['GET'])
+def reset():
+    global branches
+    branches = []
+    print("Exchange reset")
+    return "SUCCESS"
+
  
 if __name__ == "__main__":
 	E = Exchange(display_http=False)
