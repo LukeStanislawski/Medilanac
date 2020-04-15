@@ -47,7 +47,7 @@ The following commands will install all the necessary Python libraries. Please e
 
 ```
 pip install zfec pytest
-conda install pycrypto=2.6.1 flask=1.1.1 urllib3=1.25.6
+conda install pycrypto=2.6.1 flask=1.1.1 urllib3=1.25.6 numpy
 ```
 
 ## Running the software
