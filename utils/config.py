@@ -9,10 +9,10 @@ class Config():
 	num_miners = 5
 
 	# Number of blocks each miner should generate (excluding genesis)
-	num_blocks = 8
+	num_blocks = 4
 
 	# Number of foreign chunks added to each block
-	num_foreign_chunks = 7
+	num_foreign_chunks = 6
 
 	# Erasure code k value: min number of chunk required to be able to reconstruct data
 	ec_k = 3
@@ -42,6 +42,7 @@ class Config():
 	exchange_rerieve_index = "/retrieve"
 	exchange_submit_miner = "/submit-miner"
 	exchange_get_miners = "/get-miners"
+	exchange_reset = "/reset"
 
 
 	# Exchange public address (address miners can reach server on)
@@ -51,6 +52,7 @@ class Config():
 	chunk_ret_addr = exchange_pub_addr + exchange_rerieve_index
 	miner_sub_addr = exchange_pub_addr + exchange_submit_miner
 	get_miners_addr = exchange_pub_addr + exchange_get_miners
+	reset_exchange_addr = exchange_pub_addr + exchange_reset
 
 
 	# Miner
@@ -121,6 +123,7 @@ class Config():
 	# ----
 
 	ft_res_file = os.path.join(test_data_dir, "ft_results.csv")
+	dr_res_file = os.path.join(test_data_dir, "dr_results.csv")
 
 
 	# Config Validation 
@@ -141,7 +144,9 @@ class Config():
 			errors.append("fpb cannot be greater data_items_per_block")
 
 		if Config.ec_k > Config.ec_m:
-			errors.append("k value must be less than m value for erasure coding")
+			errors.append("k value must be less than or equal to m value for erasure coding")
+		if Config.ec_k == Config.ec_m:
+			warnings.append("k value is equal to m value, there will be no data redundancy on the network")
 
 
 		if len(warnings) > 0:
