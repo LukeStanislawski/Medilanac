@@ -8,7 +8,10 @@ import json
 
 
 def test(subject_id, k=Config.ec_k, m=Config.ec_m):
-	
+	"""
+	For a given blockchain, sequentially remove other blockchains, attempting to reconstruct with each removal
+	"""
+	# Log test metadata
 	print("Subject: {}".format(subject_id))
 	res = {}
 	res["k"] = k
@@ -26,6 +29,7 @@ def test(subject_id, k=Config.ec_k, m=Config.ec_m):
 	
 
 	failed = False
+	# Remove branches one at a time
 	while (not failed) and (len(bc_ids) > 1):
 		print(str(failed) + " - " + str(bc_ids))
 		rem_sub = random.randint(0, len(bc_ids) - 1)
@@ -33,6 +37,7 @@ def test(subject_id, k=Config.ec_k, m=Config.ec_m):
 		mv(rem_sub)
 		res["removed_branches"].append(rem_sub)
 
+		# Attempt to reconstruct branch under test
 		try:
 			reconstruct(subject_id, buf=2)
 			print("Successfully reconstructed branch")
@@ -41,7 +46,7 @@ def test(subject_id, k=Config.ec_k, m=Config.ec_m):
 			failed = True
 			print("Failed to reconstruct branch")
 
-
+	# Log result
 	res["rem_when_fail"] = len(bc_ids)
 	move_back()
 
@@ -50,12 +55,20 @@ def test(subject_id, k=Config.ec_k, m=Config.ec_m):
 
 
 def mv(id):
+	"""
+	Removes blockchan folder to tmp dir
+
+	id: ID of the blockchain dir to remove
+	"""
 	src = os.path.join(Config.blockchain_dir, id)
 	dest = os.path.join(Config.test_data_dir, "tmp", id)
 	shutil.move(src, dest)
 
 
 def move_back():
+	"""
+	Move all temporarily removed blockchain back to blockchain directory
+	"""
 	ids = os.listdir(os.path.join(Config.test_data_dir, "tmp"))
 	for id in ids:
 		src = os.path.join(Config.test_data_dir, "tmp", id)
@@ -64,19 +77,29 @@ def move_back():
 
 
 def main():
+	"""
+	Calculate the average fault tolerance of the network
+	"""
 	results = []
+
+	# Get all blockchain directories
 	bcs = os.listdir(Config.blockchain_dir)
 	bcs = [x for x in bcs if not x.startswith(".")]
+
+	# Randomly select 20 blockchains
 	while len(bcs) > 20:
 		bcs.pop(random.randint(0, len(bcs)-1))
 
+	# Test blockchains
 	for bc in bcs:
 		results.append(test(bc))
 
+	# Calculate average
 	frs = [x["rem_when_fail"] for x in results]
 	avg_fr = sum(frs) / float(len(frs))
 	print("Avg remaining when fail: {}".format(avg_fr))
 
+	# Write results to file
 	with open(Config.ft_res_file, "a") as f:
 		for r in results:
 			f.write(json.dumps(r) + "\n")

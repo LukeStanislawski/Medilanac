@@ -12,6 +12,9 @@ from reconstruct import reconstruct
 
 
 def test_e2e():
+    """
+    Run an end-to-end test of the timulation including branch reconstruction
+    """
     initialise()
     end_thresh = 2
 
@@ -64,6 +67,9 @@ def test_e2e():
 
 
 def initialise():
+    """
+    Set params of simulation
+    """
     Config.num_miners = 5
     Config.num_blocks = 8
     Config.num_foreign_chunks = 7
@@ -75,6 +81,9 @@ def initialise():
 
 
 def empty_dir():
+    """
+    Removes all files from test blockchain dir
+    """
     if not os.path.exists(Config.blockchain_dir):
         os.makedirs(Config.blockchain_dir)
     else:

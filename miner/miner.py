@@ -20,6 +20,11 @@ from json.decoder import JSONDecodeError
 
 class Miner():
 	def __init__(self, id, server_port, terminate_server=False):
+		"""
+		id: The ID of the miner process
+		server_port: the port that the miner server should run on
+		terminate_server: If True, miner server will automatically terminate when it has generated all of its blocks
+		"""
 		self.id = id
 		self.server_port = server_port
 		self.blockchain = []
@@ -108,7 +113,7 @@ class Miner():
 		block["head"]["id"] = 0
 		block["head"]["pub_key"] = self.pub.hex()
 		block["body"] = "This is the genesis block, the first block on the blockchain"
-		
+
 		return block
 
 
@@ -124,22 +129,25 @@ class Miner():
 		block["body"] = [x.get_data() for x in self.patients]
 		block["head"]["file_merkle"] = merkle_tree_files(block["body"])
 		block["head"]["chunk_merkle"] = [] # Updated later
-		
+
 		return block
 
 
 	def get_chunks(self, block, block_id):
 		Log.debug("Generating chunks from block {}".format(block_id))
 
+		# Make copy of block with only head and body attributes
 		block_prim = {}
 		for key in ["head", "body"]:
 			block_prim[key] = block[key]
 
+		# Encode block into erasure code fragments
 		chunks = []
 		data = json.dumps(block_prim, sort_keys=True).encode('utf-8')
 		c_datas = self.encoder.encode(data)
 		c_datas = [x.decode('cp437') for x in c_datas]
 
+		# Add chunk header to each chunk/fragment
 		for ci, c_data in enumerate(c_datas):
 			chunk = {}
 			chunk["head"] = {}
@@ -154,7 +162,8 @@ class Miner():
 		sizes = [len(x["data"]) for x in chunks]
 		Log.debug("Chunk sizes: {}".format(sizes))
 		if min(sizes) != max(sizes):
-			print ("---------CHUNK SIZES UNEQUAL----------")
+			Log.warning("Chunk sizes unequal after encoding block")
+		
 		return chunks
 
 

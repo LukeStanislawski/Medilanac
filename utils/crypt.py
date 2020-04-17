@@ -10,13 +10,21 @@ import base64
 
 
 def hash(digest):
-        byte_code = str(digest).encode('utf-8')
-        hash_object = hashlib.sha256(byte_code)
-        hex_dig = hash_object.hexdigest()
-        return hex_dig
+    """
+    Hash function
+
+    digest: data to be hashed
+    """
+    byte_code = str(digest).encode('utf-8')
+    hash_object = hashlib.sha256(byte_code)
+    hex_dig = hash_object.hexdigest()
+    return hex_dig
 
 
 def gen_keys():
+    """
+    Generate public and private RSA keys
+    """
     new_key = RSA.generate(2048, e=65537)
     private_key = new_key.exportKey("PEM")
     public_key = new_key.publickey().exportKey("PEM")
@@ -25,6 +33,12 @@ def gen_keys():
 
 
 def encrypt(public_key, body):
+    """
+    Encrypt a message with public key
+
+    public_key: Public key to be used to encrypt message with
+    body: body of message to be encrypted
+    """
     bytes_code = str(body).encode('utf-8')
     rsa_key = RSA.importKey(public_key)
     rsa_key = PKCS1_OAEP.new(rsa_key)
@@ -34,6 +48,12 @@ def encrypt(public_key, body):
 
 
 def decrypt(private_key, body):
+    """
+    Decrypt ciphertext with private key
+
+    private_key: Private key to be used to decrypt ciphertext
+    body: Ciphertext to be decrypted
+    """
     rsakey = RSA.importKey(private_key)
     rsakey = PKCS1_OAEP.new(rsakey)
     decrypted = rsakey.decrypt(body)
@@ -41,6 +61,12 @@ def decrypt(private_key, body):
 
 
 def sign(private_key, body):
+    """
+    Sign a message with provate key
+
+    private_key: Private key used to sign message
+    body: Body of message to be signed
+    """
     bytes_code = str(body).encode('utf-8')
     rsakey = RSA.importKey(private_key)
     # rsakey = PKCS1_OAEP.new(rsakey)
@@ -50,12 +76,25 @@ def sign(private_key, body):
 
 
 def verify(public_key, body, signature):
+    """
+    Verify a message using a given signature
+
+    public_key: The public key of sender
+    body: Message to be verified
+    signature: The signature to be used for verification
+    """
     bytes_code = str(body).encode('utf-8')
     rsakey = RSA.importKey(public_key)
     return rsakey.verify(bytes_code, (signature, None))
 
 
 def hash_block(block, attrs=["head", "body", "foreign_chunks"]):
+    """
+    Hashes a block from a blockchain
+
+    block: block to be hashed
+    attrs: Attributes of block to be included in hash
+    """
     raw_block = {}
 
     for attr in attrs:
@@ -65,6 +104,12 @@ def hash_block(block, attrs=["head", "body", "foreign_chunks"]):
 
 
 def hash_chunk(chunk, attrs=["head", "data"]):
+    """
+    Hashes a chunk of a block
+
+    chunk: chunk to be hashed
+    attrs: Attributes of chhunk to be included in hash
+    """
     raw_chunk = {}
     for attr in attrs:
         raw_chunk[attr] = chunk[attr]
@@ -73,6 +118,12 @@ def hash_chunk(chunk, attrs=["head", "data"]):
 
 
 def hash_filedata(filedata, attrs=["data", "filename", "filesize", "patient_id", "patient_pub_key"]):
+    """
+    Hashes file and metadata
+
+    filedata: dict filedata object to be hashed
+    attrs: Attributes of dict to be included in hash
+    """
     raw_filedata = {}
     for attr in attrs:
         if attr in filedata:
@@ -82,6 +133,12 @@ def hash_filedata(filedata, attrs=["data", "filename", "filesize", "patient_id",
     
 
 def get_rand_str(size=64, chars=string.ascii_uppercase + string.ascii_lowercase + string.digits):
+    """
+    Generates a random string
+
+    size: Length of string
+    chars: Character set to be used
+    """
     return ''.join(random.SystemRandom().choice(chars) for _ in range(size))
 
 

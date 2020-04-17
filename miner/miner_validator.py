@@ -15,6 +15,11 @@ class MinerValidator():
 
 
     def validate(self, miner):
+        """
+        Attempts to validate a miner
+        
+        miner: dictionary containing miner info
+        """
         Log.debug("Validating miner {}".format(miner["id"]))
         self.miner = miner
         
@@ -43,6 +48,9 @@ class MinerValidator():
 
 
     def fetch_headers(self):
+        """
+        Fetches the headers of a miners blockchain
+        """
         Log.debug("Fetching headers from {}".format(self.miner["address"]))
         self.headers = []
         timeout = Config.retrieve_headers_timout
@@ -66,6 +74,11 @@ class MinerValidator():
 
 
     def query_miner(self, qhash):
+        """
+        Queries the miner for a specific file
+        
+        qhash: the hash of the file to request
+        """
         Log.debug("Fetching rfile from miner at {}".format(self.miner["address"]))
         timeout = Config.query_validity_timeout
         payload = {}
@@ -96,6 +109,9 @@ class MinerValidator():
 
 
     def validate_miner(self):
+        """
+        Attempts to validate a miner
+        """
         Log.debug("Validating miner")
 
         hashes = []

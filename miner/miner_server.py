@@ -21,14 +21,19 @@ tlock = Lock()
 
 class Server():
     def __init__(self, m_id, c_id, port, m_dir, lock):
+        """
+        m_id: Miner ID
+        c_id: Miner chain ID
+        prot: Port for the server to run on
+        m_dir: Path to miner directory
+        lock: The process lock used for parallellism with miner main process
+        """
         self.m_id = m_id
         self.c_id = c_id
         self.port = port
         self.m_dir = m_dir
         global plock
         plock = lock
-
-        # log.set_up(self.m_id, self.m_dir)
 
         global chain_id
         global miner_id
@@ -44,7 +49,11 @@ class Server():
         
         self.run()
 
+
     def run(self):
+        """
+        Starts the miner server
+        """
         global app
         
         app.run(debug=False, 
@@ -55,6 +64,11 @@ class Server():
 
 
 def load_blockchain(ttl=8):
+    """
+    Loads the current blockchain from file
+
+    ttl: time to live (attempts to try and read blockchain before failing)
+    """
     Log.debug("Loading blockchain")
     global plock
     fpath = os.path.join(Config.blockchain_dir, chain_id[:8], "blockchain.json")
@@ -89,6 +103,11 @@ def load_blockchain(ttl=8):
 
 
 def load_chunk(ttl=8):
+    """
+    Loadd and pops a chunk from file and writes back remaining list
+    
+    ttl: time to live (attempts to try and read chunks before failing)
+    """
     Log.debug("Loading chunk")
     global plock
     fpath = os.path.join(Config.blockchain_dir, chain_id[:8], "chunks.json")
@@ -135,11 +154,17 @@ def load_chunk(ttl=8):
 
 
 def get_tids():
+    """
+    Returns a list of thread ids
+    """
     return [x.ident for x in threading.enumerate()]
 
 
 @app.route("/block", methods=['POST'])
 def get_blockchain():
+    """
+    Triggered when a miner requests a specific block from chain
+    """
     Log.debug("Received request: /block, threads: {}".format(get_tids()))
     global chain_id
     data = json.loads(request.data)
@@ -151,6 +176,9 @@ def get_blockchain():
 
 @app.route("/blockchain-headers", methods=['POST'])
 def get_blockchain_headers():
+    """
+    Triggered when a miner requests blockchain headers
+    """
     Log.debug("Received request: /blockchain-headers, threads: {}".format(get_tids()))
     global chain_id
     # data = json.loads(request.data)
@@ -166,6 +194,9 @@ def get_blockchain_headers():
 
 @app.route("/get-chunk", methods=['GET'])
 def get_chunks():
+    """
+    Triggered when a miner requests a chunk
+    """
     Log.debug("Received request: /get-chunk, threads: {}".format(get_tids()))
     global chain_id
     # data = json.loads(request.data)
@@ -181,6 +212,9 @@ def get_chunks():
     
 @app.route("/validate", methods=['POST'])
 def validate():
+    """
+    Triggered when a miner requests a specific file for validation
+    """
     Log.debug("Received request: /validate, threads: {}".format(get_tids()))
     global chain_id
     Log.debug(request.data)

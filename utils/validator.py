@@ -6,6 +6,11 @@ from utils.merkle import merkle
 
 
 def validate_blockchain(blockchain):
+	"""
+	Validates a blockchain
+
+	blockchain: The blockchain to validate
+	"""
 	es = []
 
 	es.extend(v_prev_head_hash(blockchain))
@@ -16,6 +21,11 @@ def validate_blockchain(blockchain):
 
 
 def validate_headers(blockchain):
+	"""
+	Validates a blockchain headers only
+
+	blockchain: The blockchain to validate headers
+	"""
 	es = []
 
 	try:
@@ -29,6 +39,9 @@ def validate_headers(blockchain):
 
 
 def v_structure(blockchain, attrs=["head", " body", "foreign_chunks"]):
+	"""
+	Verifies the structure of the blockchain and each block
+	"""
 	es = []
 
 	# Check blockchain is list
@@ -56,6 +69,11 @@ def v_structure(blockchain, attrs=["head", " body", "foreign_chunks"]):
 
 
 def v_prev_head_hash(blockchain):
+	"""
+	Verifies each block has the correct hash of the previous blocks header
+
+	blockchain: Blockchain to be verified
+	"""
 	es = []
 
 	for bi, block in enumerate(blockchain):
@@ -69,6 +87,11 @@ def v_prev_head_hash(blockchain):
 
 
 def v_single_chainid(blockchain):
+	"""
+	Verifies that each block has the same chain ID
+
+	blockchain: Blockchain to be verified
+	"""
 	chain_ids = [x["head"]["chain_id"] for x in blockchain]
 	if len(list(set(chain_ids))) != 1:
 		return ["Inconsistent chain IDs found: {}".format(set(chain_ids))]
@@ -77,6 +100,11 @@ def v_single_chainid(blockchain):
 
 
 def v_merkle_trees(blockchain):
+	"""
+	Verifies that the merkle tree for each block is correct for the data in each block
+
+	blockchain: Blockchain to be verified
+	"""
 	es = []
 
 	for bi, block in enumerate(blockchain):
@@ -90,6 +118,11 @@ def v_merkle_trees(blockchain):
 
 
 def v_merkle(t_merkle):
+	"""
+	Reconstructs a merkle tree from its leaves and compares to original
+
+	t_merkle: Merkle tree to validate
+	"""
 	v_merkle = merkle([t_merkle[-1]])
 	return v_merkle == t_merkle
 

@@ -9,7 +9,7 @@ class Config():
 	num_miners = 5
 
 	# Number of blocks each miner should generate (excluding genesis)
-	num_blocks = 4
+	num_blocks = 6
 
 	# Number of foreign chunks added to each block
 	num_foreign_chunks = 6

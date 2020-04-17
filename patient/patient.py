@@ -18,6 +18,9 @@ class Patient():
 
 
 	def get_data(self):
+		"""
+		Generates and returns data with header info
+		"""
 		self.item = {}
 		self.item["patient_id"] = self.id
 		self.item["patient_pub_key"] = str(self.pub)
@@ -38,6 +41,9 @@ class Patient():
 
 
 	def gen_sample_data(self):
+		"""
+		Generates file data and file info
+		"""
 		sample_files = [join(self.data_dir,f) for f in listdir(self.data_dir) if isfile(join(self.data_dir, f))]
 		fp = sample_files.pop(random.randint(0, len(sample_files)-1))
 		self.item["filesize"] = os.path.getsize(fp)

@@ -8,6 +8,11 @@ branches = []
 
 
 class Exchange():
+    """
+    Class to initialise and run an exchange server
+
+    display_http: If true, all http requests recieved will be printed in real time
+    """
     def __init__(self, display_http=False):
         global app
 
@@ -24,7 +29,9 @@ class Exchange():
 
 @app.route("/submit-miner", methods=['POST'])
 def submit_miner():
-    # TODO: add validation
+    """
+    Listens for announcements of existence from miners
+    """
     global branches
     data = json.loads(request.data)
     branch = {}
@@ -37,7 +44,9 @@ def submit_miner():
 
 @app.route("/get-miners", methods=['POST'])
 def get_miners():
-    # TODO: add validation
+    """
+    Return the list of known miners
+    """
     global branches
     # data = json.loads(request.data)
     return json.dumps(branches)
@@ -45,6 +54,9 @@ def get_miners():
 
 @app.route("/reset", methods=['GET'])
 def reset():
+    """
+    Allows the triggering of the wiping of exchange memory, resetting list of known miners
+    """
     global branches
     branches = []
     print("Exchange reset")

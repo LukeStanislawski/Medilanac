@@ -6,6 +6,10 @@ import matplotlib.pyplot as plt
 
 
 def main():
+	"""
+	Displays a graph showing data related to average network fault tolerance
+	"""
+	# Load results data
 	with open(Config.ft_res_file) as f:
 		lines = f.readlines()
 
@@ -14,6 +18,7 @@ def main():
 		results.append(json.loads(line))
 
 
+	# Format results data
 	d_rdnds = sorted(list(set([x["d_redundancy"] for x in results])))
 	avg_drd = []
 	for drd in d_rdnds:
@@ -28,6 +33,7 @@ def main():
 	print(avg_drd)
 
 
+	# Plot data and display graph
 	plt.title('Fault tolerance against data redundancy')
 	plt.ylabel('Average Fault tolerance (%)')
 	plt.xlabel('Data redundancy (%)')

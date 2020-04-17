@@ -6,12 +6,18 @@ import urllib3
 
 
 def reset_exchange():
+	"""
+	Sends a request to exchhange to reset list of known miners
+	"""
 	http = urllib3.PoolManager()
 	r = http.request('GET', Config.reset_exchange_addr)
 	print("Exchange response to reset request: {}".format(r.data))
 
 
 def main():
+	"""
+	Run the simulation
+	"""
     Config.validate()
     reset_exchange()
 
