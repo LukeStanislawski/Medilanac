@@ -208,7 +208,7 @@ class Miner():
 		"""
 		Retrieves foreign chunks from network
 		"""
-		Log.debug("Attempting top retrieve foreign chunks")
+		Log.debug("Attempting to retrieve foreign chunks")
 		chunks = []
 		timeout = Config.foreign_chunk_timout + Config.num_foreign_chunks
 
@@ -308,7 +308,7 @@ class Miner():
 	                 headers={'Content-Type': 'application/json'},
 	                 body="{}", timeout=2.0)
 				
-				Log.debug("Received response".format(r.data))
+				Log.debug("Received response")
 				miners = json.loads(r.data)
 				Log.debug("Parsed response JSON")
 

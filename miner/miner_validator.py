@@ -63,7 +63,7 @@ class MinerValidator():
                      headers={'Content-Type': 'application/json'},
                      body="{}", timeout=2.0)
                 
-                Log.debug("Received response: {}".format(r.data))
+                Log.debug("Received response")
                 self.headers = json.loads(r.data)
                 Log.debug("Parsed response JSON")
 
@@ -96,7 +96,7 @@ class MinerValidator():
                         body=json.dumps(payload), 
                         timeout=2.0)
                 
-                Log.debug("Received response: {}".format(r.data))
+                Log.debug("Received response")
                 rfile = json.loads(r.data)
                 Log.debug("Parsed response JSON")
 
@@ -115,14 +115,15 @@ class MinerValidator():
         Log.debug("Validating miner")
 
         hashes = []
-        for block in self.headers:
-            Log.debug("newBlock")
+        for bi, block in enumerate(self.headers):
+            Log.debug("Block {}".format(bi))
             if "file_merkle" in block["head"]:
-                Log.debug("string is in block")
-                Log.debug(json.dumps(block["head"], indent=4))
+                Log.debug("Block has head")
                 hashes.extend(block["head"]["file_merkle"][-1])
+
             else:
                 Log.debug("string is not in block")
+
 
         qhash = hashes.pop(random.randint(0,len(hashes)-1))
         Log.debug("Query hash selected: {}".format(qhash[:8]))
