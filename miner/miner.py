@@ -21,6 +21,8 @@ from json.decoder import JSONDecodeError
 class Miner():
 	def __init__(self, id, server_port, terminate_server=False):
 		"""
+		Main process of miner
+
 		id: The ID of the miner process
 		server_port: the port that the miner server should run on
 		terminate_server: If True, miner server will automatically terminate when it has generated all of its blocks
@@ -60,6 +62,9 @@ class Miner():
 
 
 	def main(self):
+		"""
+		Generates genesis block then preconfigured number of blocks for blockchain
+		"""
 		Log.info("Initialised. PubKey hash: {}..".format(self.chain_id[:8]))
 
 		# Generate genesis block
@@ -106,6 +111,9 @@ class Miner():
 
 
 	def gen_genesis(self):
+		"""
+		Generates genesis block
+		"""
 		Log.debug("Generating genesis block")
 		block = {}
 		block["head"] = {}
@@ -118,7 +126,10 @@ class Miner():
 
 
 	def gen_new_block(self):
-		Log.debug("Generating new block {}".format(len(self.blockchain)))
+		"""
+		Generates a new block with data
+		"""
+		Log.debug("Generating block data for block {}".format(len(self.blockchain)))
 		block = {}
 		block["head"] = {}
 		block["head"]["prev_block_hash"] = crypt.hash_block(self.blockchain[-1])
@@ -134,6 +145,12 @@ class Miner():
 
 
 	def get_chunks(self, block, block_id):
+		"""
+		Encodes a block with erasure code and returns chunks
+
+		block: The block to encode
+		block_id: Thhe block is to be used in the chunk header
+		"""
 		Log.debug("Generating chunks from block {}".format(block_id))
 
 		# Make copy of block with only head and body attributes
@@ -168,6 +185,11 @@ class Miner():
 
 
 	def write_chunks(self, chunks):
+		"""
+		Writes chunks to file
+
+		chunks: Chhunks to be written to file
+		"""
 		Log.debug("Updating chunks in file")
 		self.lock_acquire()
 
@@ -183,6 +205,9 @@ class Miner():
 
 
 	def get_foreign_chunks(self):
+		"""
+		Retrieves foreign chunks from network
+		"""
 		Log.debug("Attempting top retrieve foreign chunks")
 		chunks = []
 		timeout = Config.foreign_chunk_timout + Config.num_foreign_chunks
@@ -221,13 +246,19 @@ class Miner():
 
 
 	def write_blockchain(self):
-		Log.debug("Writing blockchain")
+		"""
+		Writes current blockchain to file
+		"""
+		Log.debug("Writing blockchain to file")
 
 		with open(self.chain_dir + "/blockchain.json", 'w') as f:
 			f.write(json.dumps(self.blockchain, sort_keys=True, indent=4))
 
 
 	def publish_existence(self):
+		"""
+		Published existence to exchange
+		"""
 		Log.debug("Publishing existence to exchange")
 		data_out = {}
 		data_out["branch_id"] = self.chain_id
@@ -262,6 +293,9 @@ class Miner():
 
 
 	def get_miners(self):
+		"""
+		Retrieves list of known miners from exchange
+		"""
 		Log.debug("Attempting to retrieve miners list from exchange")
 		miners = []
 		timeout = Config.retrieve_miners_timout
@@ -274,7 +308,7 @@ class Miner():
 	                 headers={'Content-Type': 'application/json'},
 	                 body="{}", timeout=2.0)
 				
-				Log.debug("Received response: {}".format(r.data))
+				Log.debug("Received response".format(r.data))
 				miners = json.loads(r.data)
 				Log.debug("Parsed response JSON")
 
@@ -293,7 +327,10 @@ class Miner():
 
 
 	def pick_miner(self):
-		Log.debug("Picking miner")
+		"""
+		Selects a valid miner to request chunks from
+		"""
+		Log.debug("Selecting miner")
 		valid = False
 		
 		while not valid:
@@ -307,6 +344,9 @@ class Miner():
 
 
 	def load_local_chunks(self):
+		"""
+		Loads local chunks from file
+		"""
 		Log.debug("Loading local chunks from file")
 		self.lock_acquire()
 
@@ -315,13 +355,15 @@ class Miner():
 		Log.debug("Loaded {} chunks from file".format(len(chunks)))
 
 		self.lock_release()
-		Log.debug("Lock released")
 		
 		return chunks
 
 
 	def update_chunk_merkle(self, block):
-		Log.debug("Updating chunk merkle tree from block {}".format(block["head"]["id"]))
+		"""
+		Updated the merkle tree in a blocks header to reflect the foreign chunks stored in the block
+		"""
+		Log.debug("Updating chunk merkle tree for block {}".format(block["head"]["id"]))
 		hashes = [x["hash"] for x in block["foreign_chunks"]]
 		merkle = merkle_tree(hashes)
 		block["head"]["chunk_merkle"] = merkle[0:-1]
@@ -329,12 +371,18 @@ class Miner():
 
 
 	def lock_acquire(self):
+		"""
+		Aquires the process lock
+		"""
 		Log.debug("Miner acquiring lock..")
 		self.lock.acquire()
 		Log.debug("Miner successfully acquired lock")
 
 
 	def lock_release(self):
+		"""
+		Releases the process lock
+		"""
 		Log.debug("Miner releasing lock..")
 		self.lock.release()
 		Log.debug("Miner successfully released lock")
