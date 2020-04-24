@@ -42,6 +42,14 @@ $ conda install pycrypto=2.6.1 flask=1.1.1 urllib3=1.25.6 numpy
 
 ## Running the software
 
+**Prerequisites**
+
+Please ensure that your blockchain directory is empty. The default blockchain directory is `data/blockchain`, however this can be changed in the config.
+
+**1. Adjust Parameters**
+
+All parameters for the simulation can be adjusted by changing the values in `utils/config.py`, or they can be left as the default values. The config parameters are validated when the software initiates.
+
 **1. Running the exchange:**
 
 First we need to launch the exchange, a simple web server that will run locally on your machine allowing different miners to exchange chunks of their blocks. 
@@ -55,7 +63,7 @@ $ python exchange.py
 
 **2. Run the miners:**
 
-Next we will run the miners. The program will create multiple miner processes all generating blocks and exchanging chunks between each other. They will all write their blockchains as they are being generated to their respective folders in the `data/blockchain` directory within the project folder.
+Next we will run the miners. The program will create multiple miner processes all generating blocks and exchanging chunks between each other. They will all write their blockchains as they are being generated to their respective folders in (by default) the `data/blockchain` directory within the project folder.
 
 Open a new terminal window, activate the medilanac python environment again, and run the following command from inside the main project folder:
 
@@ -75,11 +83,9 @@ $ python reconstruct.py <chain_id>
 
 The script will create a new blockchain in the blockchain directory with the original blockchain (excluding the foreign chunks).
 
-**Adjusting Parameters**
-
-All parameters for the simulation can be adjusted by changing the values in `utils/config.py`. The config parameters are validated when the software initiates.
-
 ## Testing
+
+### PyTest
 
 The tests can be run using pytest with the following command from inside the project directory:
 
@@ -92,6 +98,48 @@ To run an end-to-end test of the system, enter the following command:
 ```
 $ py.test test/test_e2e.py
 ```
+
+### Fault Tolerance
+
+The fault tolerance of the network can be tested by following these steps:
+
+1. Run the simulation with the parameters you desire (see [Running the Software](#running-the-software)).
+   **NOTE: You must have the simulation configured to initiate a minimum of 20 miners.**
+
+2. Once the simulation has terminated, enter the following command to run the test script:
+
+   ```
+   $ python test/fault_tolerance.py
+   ```
+
+   This will scan the blockchain folders in the blockchain directory and attempt reconstruction of 20 branches with each iteration. The results will be output to `test/testdata/ft_results.csv`.
+
+3. Run the following command to display a graph of the results:
+
+   ```
+   python test/graph_ft.py
+   ```
+
+### Data Ratio
+
+The data ratio of the network is the amount of data required to store one block in relation to the amount of primary data on the block. The average data ratio of the blocks on the network can be tested by following these steps:
+
+1. Run the simulation with the parameters you desire (see [Running the Software](#running-the-software)).
+   **NOTE: You must have the simulation configured to initiate a minimum of 20 miners.**
+
+2. Once the simulation has terminated, enter the following command to run the test script:
+
+   ```
+   $ python test/data_ratio.py
+   ```
+
+   This will scan the blockchain folders in the blockchain directory and calculate the average data ratio of blocks in a new branch with each iteration. The results will be output to `test/testdata/dr_results.csv`.
+
+3. Run the following command to display a graph of the results:
+
+   ```
+   python test/graph_dr.py
+   ```
 
 ## Dependencies
 
