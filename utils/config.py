@@ -25,6 +25,7 @@ class Config():
 		os.path.dirname(os.path.dirname(__file__)), 
 		"data", "blockchain")
 
+	# Path to test data dir
 	test_data_dir = os.path.join(
 		os.path.dirname(os.path.dirname(__file__)),
 		"test", "test_data")
@@ -35,11 +36,12 @@ class Config():
 
 	# Exchange internal IP address
 	exchange_ip = "localhost"
+	# Exchange internal port
 	exchange_port = 4999
 
-	# Index of chunk submittion and retrieval
+	# Index of chunk submission and retrieval
 	exchange_submit_index = "/submit"
-	exchange_rerieve_index = "/retrieve"
+	exchange_retrieve_index = "/retrieve"
 	exchange_submit_miner = "/submit-miner"
 	exchange_get_miners = "/get-miners"
 	exchange_reset = "/reset"
@@ -74,10 +76,10 @@ class Config():
 	# Number of attempts to query validity of miner
 	query_validity_timeout = 5
 
-	#Min wait time between http request attempts (seconds)
+	# Min wait time between http request attempts (seconds)
 	miner_min_wait = 0.1
 
-	#Max wait time between http request attempts (seconds)
+	# Max wait time between http request attempts (seconds)
 	miner_max_wait = 0.3
 
 	# Wait time between requesting miners list from exchange
@@ -122,7 +124,9 @@ class Config():
 	# Test
 	# ----
 
+	# File path of fault tolerance results
 	ft_res_file = os.path.join(test_data_dir, "ft_results.csv")
+	# File path of data ratio results
 	dr_res_file = os.path.join(test_data_dir, "dr_results.csv")
 
 
