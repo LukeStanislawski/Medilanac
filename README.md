@@ -125,8 +125,6 @@ Below is the complete list of all configuration parameters as can be found in `u
 | fpb                     | Number of files to validate from each block                  |
 | bpbc                    | Number of blocks to validate files from                      |
 
-
-
 ## Testing
 
 ### PyTest
@@ -164,6 +162,12 @@ The fault tolerance of the network can be tested by following these steps:
    python test/graph_ft.py
    ```
 
+To graph located at a different file path to that which is defined in the config, run the following command:
+
+```
+python test/graph_dr.py path/to/data.csv
+```
+
 ### Data Ratio
 
 The data ratio of the network is the amount of data required to store one block in relation to the amount of primary data on the block. The average data ratio of the blocks on the network can be tested by following these steps:
@@ -184,6 +188,12 @@ The data ratio of the network is the amount of data required to store one block 
    ```
    python test/graph_dr.py
    ```
+
+To graph located at a different file path to that which is defined in the config, run the following command:
+
+```
+python test/graph_dr.py path/to/data.csv
+```
 
 ## Dependencies
 

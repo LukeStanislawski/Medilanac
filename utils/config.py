@@ -6,7 +6,7 @@ class Config():
 	# ----
 
 	# Number of miners to create
-	num_miners = 5
+	num_miners = 50
 
 	# Number of blocks each miner should generate (excluding genesis)
 	num_blocks = 6
@@ -51,7 +51,7 @@ class Config():
 	# exchange_pub_addr = "http://64e82222.ngrok.io"
 	exchange_pub_addr = "http://{}:{}".format(exchange_ip, exchange_port)
 	chunk_sub_addr = exchange_pub_addr + exchange_submit_index
-	chunk_ret_addr = exchange_pub_addr + exchange_rerieve_index
+	chunk_ret_addr = exchange_pub_addr + exchange_retrieve_index
 	miner_sub_addr = exchange_pub_addr + exchange_submit_miner
 	get_miners_addr = exchange_pub_addr + exchange_get_miners
 	reset_exchange_addr = exchange_pub_addr + exchange_reset

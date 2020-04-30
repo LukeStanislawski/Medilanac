@@ -5,12 +5,12 @@ import json
 import matplotlib.pyplot as plt
 
 
-def main():
+def main(fpath):
 	"""
 	Displays a graph showing data related to average network fault tolerance
 	"""
 	# Load results data
-	with open(Config.ft_res_file) as f:
+	with open(fpath) as f:
 		lines = f.readlines()
 
 	results = []
@@ -43,4 +43,7 @@ def main():
 
 
 if __name__ == "__main__":
-	main()
+	if len(sys.argv) > 1:
+		main(sys.argv[1])
+	else:
+		main(Config.ft_res_file)
