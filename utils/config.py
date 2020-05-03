@@ -6,7 +6,7 @@ class Config():
 	# ----
 
 	# Number of miners to create
-	num_miners = 50
+	num_miners = 10
 
 	# Number of blocks each miner should generate (excluding genesis)
 	num_blocks = 6

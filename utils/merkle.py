@@ -11,8 +11,10 @@ def merkle_tree(data : [str]):
 	"""
 	if data is None or len(data) < 1:
 		return []
-	else:
+	elif all([type(x)==str for x in data]):
 		return merkle([data])
+	else:
+		return merkle([ [crypt.hash(x) for x in data] ])
 
 
 def merkle_tree_files(data : [str]):
@@ -34,14 +36,23 @@ def merkle_tree_files(data : [str]):
 
 def merkle(tree):
 	"""
-	Recursive function that generates the next level up of a merkle tree
+	Recursive function that generates the next level up 
+	of a tree, with each call
 
 	tree: Incomplete merkle tree
 	"""
-	while len(tree[-1]) != 1:
+	if len(tree[-1]) == 1:
+		tree.reverse()
+		return tree
+	else:
 		tree.append(hash_list(tree[-1]))
-	tree.reverse()
-	return tree
+		return merkle(tree)
+
+
+	# while len(tree[-1]) != 1:
+	# 	tree.append(hash_list(tree[-1]))
+	# tree.reverse()
+	# return tree
 	
 
 def hash_list(a):
