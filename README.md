@@ -2,7 +2,9 @@
 
 Author: Luke Stanislawski
 
-email: psyls6@nottingham.ac.uk
+email: lukestanislawski@gmail.com
+
+Accompanying dissertation and results available on request.
 
 ## Current Status of Project
 
